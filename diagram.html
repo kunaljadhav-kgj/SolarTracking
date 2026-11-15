@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circuit Diagram | Solar Tracking System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { min-height: 100vh; padding: 24px; color: #102a43; background: linear-gradient(135deg, #f0f4f8, #d9e2ec); }
+    main { width: min(100%, 780px); margin: 24px auto; padding: 30px; background: #fff; border-top: 6px solid #f59e0b; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,.08); }
+    .back { display: inline-block; margin-bottom: 20px; color: #64748b; font-weight: 600; text-decoration: none; }
+    .back:hover { color: #b45309; }
+    header { margin-bottom: 24px; padding-bottom: 16px; text-align: center; border-bottom: 2px dashed #e2e8f0; }
+    h1 { color: #1e293b; font-size: clamp(24px, 5vw, 32px); }
+    h2 { margin: 22px 0 8px; color: #334155; font-size: 19px; }
+    p, li { color: #475569; line-height: 1.7; }
+    ul { padding-left: 22px; }
+    li { margin: 6px 0; }
+    .diagram { margin: 18px 0; padding: 18px; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
+    .flow { display: grid; justify-items: center; gap: 8px; min-width: 250px; color: #334155; font-weight: 600; text-align: center; }
+    .flow span { width: min(100%, 330px); padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 9px; background: #fff; }
+    .flow b { color: #d97706; font-size: 20px; line-height: 1; }
+    .note { margin-top: 20px; padding: 14px 16px; border-left: 4px solid #f59e0b; border-radius: 8px; background: #fffbeb; color: #78350f; line-height: 1.6; }
+    @media (max-width: 520px) { body { padding: 12px; } main { margin: 10px auto; padding: 22px 18px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="starting.html#contents-section">← Back to Contents</a>
+    <header><h1>Circuit Diagram</h1></header>
+    <article>
+      <p>This block diagram shows the main signal flow in an Arduino-based solar tracking system.</p>
+      <div class="diagram" role="img" aria-label="Sunlight is detected by LDR sensors, read by Arduino, and used to control the servo motor and solar panel">
+        <div class="flow">
+          <span>☀ Sunlight</span><b aria-hidden="true">↓</b>
+          <span>LDR Sensor System</span><b aria-hidden="true">↓</b>
+          <span>Arduino UNO</span><b aria-hidden="true">↓</b>
+          <span>Servo Motor</span><b aria-hidden="true">↓</b>
+          <span>Solar Panel Movement</span><b aria-hidden="true">↓</b>
+          <span>Solar Energy Output</span>
+        </div>
+      </div>
+      <h2>Main Components</h2>
+      <ul>
+        <li><strong>Arduino UNO:</strong> Reads sensor values and controls the motor.</li>
+        <li><strong>LDR sensors:</strong> Detect light intensity from different directions.</li>
+        <li><strong>Servo motor:</strong> Adjusts the solar panel position.</li>
+        <li><strong>Resistors:</strong> Form voltage-divider circuits with the LDRs.</li>
+        <li><strong>Solar panel, breadboard and wires:</strong> Provide energy conversion and circuit connections.</li>
+      </ul>
+      <h2>Example Connections</h2>
+      <ul>
+        <li>LDR divider 1 midpoint → Arduino A0</li>
+        <li>LDR divider 2 midpoint → Arduino A1</li>
+        <li>Servo signal wire → Arduino D9</li>
+        <li>Connect Arduino ground and the servo supply ground together.</li>
+      </ul>
+      <div class="note"><strong>Important:</strong> Use a suitable external 5V supply for servo motors when needed. Do not connect a solar panel directly to Arduino input pins; use appropriate power-management circuitry.</div>
+    </article>
+  </main>
+</body>
+</html>
