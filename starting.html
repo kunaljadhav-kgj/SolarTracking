@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Tracking System</title>
+    <style>
+        /* साधी आणि आकर्षक डिझाइन (Clean & Modern CSS) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #102a43;
+        }
+
+        /* मुख्य कार्ड बॉक्स */
+        .main-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            padding: 35px 30px;
+            border-top: 6px solid #f59e0b;
+            transition: all 0.3s ease;
+        }
+
+        /* शीर्षक: Solar Tracking System */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 2px dashed #e2e8f0;
+        }
+
+        .header h1 {
+            font-size: 23px;
+            color: #1e293b;
+            letter-spacing: 1px;
+        }
+
+        .header span {
+            color: #f59e0b;
+        }
+
+        /* मेनू पर्याय */
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+
+        .menu-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 500;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item::before {
+            content: "•";
+            color: #f59e0b;
+            font-size: 24px;
+            margin-right: 12px;
+            line-height: 1;
+        }
+
+        .menu-item:hover {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            transform: translateX(5px);
+            color: #b45309;
+        }
+
+        /* START बटण */
+        .start-btn-container {
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 14px 45px;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+        }
+
+        /* सेक्शन्स दाखवण्यासाठी ॲनिमेशन */
+        .section-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            color: #0f172a;
+        }
+
+        /* नवीन पेजवरील इमेज बॉक्स (तुमच्या दुसऱ्या ड्रॉइंगप्रमाणे) */
+        .solar-image-box {
+            border: 2px solid #cbd5e1;
+            background: linear-gradient(180deg, #e0f2fe 0%, #f0fdf4 100%);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 10px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        .solar-image-box svg {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .image-caption {
+            font-size: 13px;
+            color: #475569;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* माहिती बॉक्स (Contents, Instruments, Parameters साठी) */
+        .info-box {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            line-height: 1.7;
+        }
+
+        .info-box ul {
+            padding-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 8px;
+        }
+
+        .topic-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .topic-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fff;
+            color: #334155;
+            text-align: left;
+            font: inherit;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .topic-button:hover {
+            transform: translateY(-2px);
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .topic-number {
+            flex: 0 0 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: #fff7ed;
+            color: #d97706;
+            font-weight: 700;
+        }
+
+        .topic-button strong {
+            display: block;
+            color: #1e293b;
+        }
+
+        .topic-button small {
+            display: block;
+            margin-top: 3px;
+            color: #64748b;
+        }
+
+        .content-card {
+            background: #f8fafc;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            line-height: 1.7;
+        }
+
+        .content-card h3 {
+            margin: 16px 0 6px;
+            color: #334155;
+        }
+
+        .content-card h3:first-child {
+            margin-top: 0;
+        }
+
+        .content-card p + p {
+            margin-top: 10px;
+        }
+
+        .content-card ul {
+            padding-left: 20px;
+        }
+
+        .highlight-note {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            background: #fffbeb;
+            color: #78350f;
+        }
+
+        .circuit-diagram {
+            display: block;
+            width: 100%;
+            height: auto;
+            margin: 14px auto;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .diagram-legend {
+            display: grid;
+            gap: 8px;
+            margin-top: 14px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        /* सोलर ट्रॅकिंग डेमो बार */
+        .tracker-display {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .sun-angle {
+            font-size: 34px;
+            font-weight: bold;
+            color: #d97706;
+            margin: 8px 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: #f59e0b;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <!-- 1. मुख्य होम पेज (पहिल्या इमेजप्रमाणे) -->
+        <div id="home-section" class="section-content">
+            <div class="header">
+                <h1><span>-</span> Solar Tracking System <span>-</span></h1>
+            </div>
+
+            <ul class="menu-list">
+                <li class="menu-item" onclick="showSection('team-section')">Team members</li>
+                <li class="menu-item" onclick="showSection('about-section')">About Us</li>
+                <li class="menu-item" onclick="showSection('track-section')">Track Solar</li>
+            </ul>
+
+            <div class="start-btn-container">
+                <!-- START वर क्लिक केल्यावर 'start-page-section' उघडेल -->
+                <button class="start-btn" onclick="showSection('start-page-section')">- START -</button>
+            </div>
+        </div>
+
+        <!-- 2. START वर क्लिक केल्यावर उघडणारे पेज (दुसऱ्या इमेजप्रमाणे) -->
+        <div id="start-page-section" class="section-content active">
+            <button class="back-btn" onclick="window.location.href='index.html'">← Back to Home</button>
+            <div class="header">
+                <h1><span>-</span> Solar Tracking System <span>-</span></h1>
+            </div>
+
+            <ul class="menu-list">
+                <li class="menu-item" onclick="showSection('contents-section')">Our Contents</li>
+                <li class="menu-item" onclick="showSection('instruments-section')">Our Instruments</li>
+                <li class="menu-item" onclick="window.location.href='parameters.html'">Our Parameters</li>
+            </ul>
+
+            <!-- तळाचा बॉक्स: Solar Tracking ची चांगली इमेज -->
+            <div class="solar-image-box">
+                <!-- स्वच्छ आणि आकर्षक सोलर ट्रॅकिंग इलस्ट्रेशन (SVG) -->
+                <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+                    <!-- सूर्य आणि किरणे -->
+                    <circle cx="60" cy="40" r="20" fill="#f59e0b" />
+                    <g stroke="#f59e0b" stroke-width="3" stroke-linecap="round">
+                        <line x1="60" y1="10" x2="60" y2="16" />
+                        <line x1="60" y1="64" x2="60" y2="70" />
+                        <line x1="30" y1="40" x2="36" y2="40" />
+                        <line x1="84" y1="40" x2="90" y2="40" />
+                        <line x1="39" y1="19" x2="43" y2="23" />
+                        <line x1="77" y1="57" x2="81" y2="61" />
+                        <line x1="39" y1="61" x2="43" y2="57" />
+                        <line x1="77" y1="23" x2="81" y2="19" />
+                    </g>
+                    <!-- सूर्यकिरण पॅनेलकडे जाताना -->
+                    <line x1="88" y1="52" x2="145" y2="78" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4,4" />
+                    <line x1="82" y1="62" x2="135" y2="90" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4,4" />
+
+                    <!-- जमीन (Base) -->
+                    <rect x="20" y="135" width="260" height="6" rx="3" fill="#64748b" />
+
+                    <!-- सोलर पॅनेलचा स्टँड -->
+                    <rect x="172" y="95" width="10" height="40" fill="#334155" />
+                    <rect x="157" y="130" width="40" height="6" rx="2" fill="#1e293b" />
+
+                    <!-- झुकलेला सोलर पॅनेल (सूर्याकडे तोंड केलेला) -->
+                    <g transform="rotate(-28 177 95)">
+                        <rect x="122" y="83" width="110" height="14" rx="2" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="2" />
+                        <line x1="125" y1="86" x2="229" y2="86" stroke="#93c5fd" stroke-width="1.5" />
+                    </g>
+                    <!-- सर्वो मोटर जॉइंट -->
+                    <circle cx="177" cy="95" r="6" fill="#f59e0b" stroke="#1e293b" stroke-width="2" />
+                </svg>
+                <div class="image-caption">Automatic Sun-Tracking Solar Panel</div>
+            </div>
+        </div>
+
+        <!-- 3. Start Page मधील उप-पेजेस (Our Contents, Instruments, Parameters) -->
+        <div id="contents-section" class="section-content">
+            <button class="back-btn" onclick="showSection('start-page-section')">← Back</button>
+            <div class="header"><h1>Our Contents</h1></div>
+            <div class="topic-list">
+                <button class="topic-button" onclick="window.location.href='introduction.html'">
+                    <span class="topic-number">1</span>
+                    <span><strong>Introduction</strong><small>Solar tracking system ओळख</small></span>
+                </button>
+                <button class="topic-button" onclick="window.location.href='working.html'">
+                    <span class="topic-number">2</span>
+                    <span><strong>Working Principle</strong><small>LDR सेन्सर आणि पॅनेलची हालचाल</small></span>
+                </button>
+                <button class="topic-button" onclick="window.location.href='diagram.html'">
+                    <span class="topic-number">3</span>
+                    <span><strong>Circuit Diagram</strong><small>मुख्य जोडणी आणि घटक</small></span>
+                </button>
+                <button class="topic-button" onclick="window.location.href='advantages.html'">
+                    <span class="topic-number">4</span>
+                    <span><strong>Advantages &amp; Future Scope</strong><small>फायदे आणि पुढील शक्यता</small></span>
+                </button>
+            </div>
+        </div>
+
+        <div id="introduction-section" class="section-content">
+            <button class="back-btn" onclick="showSection('contents-section')">← Back to Contents</button>
+            <div class="header"><h1>Introduction</h1></div>
+            <div class="content-card">
+                <h3>Solar Tracking System म्हणजे काय?</h3>
+                <p>सोलर ट्रॅकिंग सिस्टम सूर्याच्या दिशेनुसार सोलर पॅनेलचा कोन बदलते. त्यामुळे पॅनेलवर अधिक थेट सूर्यप्रकाश पडतो आणि दिवसभर ऊर्जा निर्मिती सुधारण्यास मदत होते.</p>
+                <h3>आपल्या प्रकल्पाची कल्पना</h3>
+                <p>या प्रकल्पात LDR सेन्सर प्रकाशाची दिशा ओळखतात. Arduino सेन्सरमधील फरकानुसार सर्वो मोटरला हालचालीचा संकेत देते आणि मोटर पॅनेलला प्रकाशाकडे वळवते.</p>
+                <div class="highlight-note"><strong>मुख्य उद्देश:</strong> सूर्यप्रकाशाचा अधिक चांगला उपयोग करून सोलर पॅनेलची कार्यक्षमता वाढवणे.</div>
+            </div>
+        </div>
+
+        <div id="working-section" class="section-content">
+            <button class="back-btn" onclick="showSection('contents-section')">← Back to Contents</button>
+            <div class="header"><h1>Working Principle</h1></div>
+            <div class="content-card">
+                <h3>सिस्टम कशी काम करते?</h3>
+                <ul>
+                    <li>दोन LDR सेन्सर वेगवेगळ्या दिशेचा प्रकाश मोजतात.</li>
+                    <li>Arduino दोन्ही सेन्सरचे analog readings घेऊन त्यांची तुलना करतो.</li>
+                    <li>एका बाजूचा प्रकाश जास्त असल्यास Arduino सर्वो मोटरला त्या दिशेने फिरण्याचा संकेत देतो.</li>
+                    <li>दोन्ही readings जवळपास समान झाल्यावर पॅनेल त्या दिशेला स्थिर राहते.</li>
+                    <li>सूर्याची दिशा बदलत गेल्यावर ही तुलना आणि हालचाल पुन्हा होते.</li>
+                </ul>
+                <div class="highlight-note"><strong>टीप:</strong> प्रत्यक्ष सेटअपमध्ये मोटरची हालचाल मर्यादित ठेवण्यासाठी योग्य कोनाची मर्यादा आणि स्थिर reading साठी छोटा tolerance वापरता येतो.</div>
+            </div>
+        </div>
+
+        <div id="circuit-section" class="section-content">
+            <button class="back-btn" onclick="showSection('contents-section')">← Back to Contents</button>
+            <div class="header"><h1>Circuit Diagram</h1></div>
+            <div class="content-card">
+                <p>खालील आकृती ही दोन LDR आणि सर्वो मोटर वापरणाऱ्या Arduino-आधारित ट्रॅकरची साधी जोडणी दाखवते.</p>
+                <svg class="circuit-diagram" viewBox="0 0 520 300" role="img" aria-label="Arduino ला दोन LDR सेन्सर आणि सर्वो मोटर जोडण्याचा आकृतीबंध">
+                    <rect x="18" y="92" width="190" height="150" rx="14" fill="#e0f2fe" stroke="#0284c7" stroke-width="2" />
+                    <text x="113" y="122" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Arduino Uno</text>
+                    <text x="40" y="158" font-size="13" fill="#334155">5V</text>
+                    <text x="40" y="187" font-size="13" fill="#334155">A0  ·  A1</text>
+                    <text x="40" y="216" font-size="13" fill="#334155">D9  ·  GND</text>
+                    <line x1="87" y1="154" x2="190" y2="154" stroke="#ef4444" stroke-width="3" />
+                    <line x1="87" y1="183" x2="190" y2="183" stroke="#2563eb" stroke-width="3" />
+                    <line x1="87" y1="212" x2="190" y2="212" stroke="#475569" stroke-width="3" />
+
+                    <rect x="330" y="22" width="166" height="92" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" />
+                    <text x="413" y="47" text-anchor="middle" font-size="15" font-weight="700" fill="#78350f">LDR Divider 1</text>
+                    <text x="413" y="70" text-anchor="middle" font-size="13" fill="#475569">5V — LDR — A0</text>
+                    <text x="413" y="92" text-anchor="middle" font-size="13" fill="#475569">A0 — 10kΩ — GND</text>
+                    <path d="M330 65 H285 V183 H208" fill="none" stroke="#2563eb" stroke-width="3" />
+
+                    <rect x="330" y="132" width="166" height="92" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" />
+                    <text x="413" y="157" text-anchor="middle" font-size="15" font-weight="700" fill="#78350f">LDR Divider 2</text>
+                    <text x="413" y="180" text-anchor="middle" font-size="13" fill="#475569">5V — LDR — A1</text>
+                    <text x="413" y="202" text-anchor="middle" font-size="13" fill="#475569">A1 — 10kΩ — GND</text>
+                    <path d="M330 176 H265 V183 H208" fill="none" stroke="#7c3aed" stroke-width="3" />
+
+                    <rect x="330" y="240" width="166" height="48" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="2" />
+                    <text x="413" y="260" text-anchor="middle" font-size="14" font-weight="700" fill="#14532d">Servo Motor</text>
+                    <text x="413" y="279" text-anchor="middle" font-size="12" fill="#334155">Signal D9 · Power · GND</text>
+                    <path d="M208 212 H250 V264 H330" fill="none" stroke="#16a34a" stroke-width="3" />
+                </svg>
+                <div class="diagram-legend">
+                    <div><strong>सेन्सर:</strong> प्रत्येक LDR साठी 10kΩ resistor वापरून voltage divider तयार करा; मधला बिंदू A0 आणि A1 ला जोडा.</div>
+                    <div><strong>सर्वो:</strong> Signal वायर D9 ला, आणि power/GND योग्य पुरवठ्याला जोडा. बाह्य servo supply वापरल्यास Arduino आणि supply चा GND common ठेवा.</div>
+                </div>
+                <div class="highlight-note">घटकांच्या pinout नुसार जोडणी तपासा. मोटरला Arduino च्या 5V pin वरून पुरेशी power मिळेलच असे नाही.</div>
+            </div>
+        </div>
+
+        <div id="advantages-section" class="section-content">
+            <button class="back-btn" onclick="showSection('contents-section')">← Back to Contents</button>
+            <div class="header"><h1>Advantages &amp; Future Scope</h1></div>
+            <div class="content-card">
+                <h3>फायदे</h3>
+                <ul>
+                    <li>सूर्याच्या दिशेनुसार पॅनेलचा कोन बदलल्याने सूर्यप्रकाशाचा अधिक चांगला उपयोग होऊ शकतो.</li>
+                    <li>स्थिर पॅनेलच्या तुलनेत दिवसभरातील ऊर्जा संकलन सुधारण्यास मदत होते.</li>
+                    <li>LDR, Arduino आणि servo वापरून tracking ची मूलभूत संकल्पना प्रत्यक्ष समजते.</li>
+                    <li>हा प्रकल्प sensor, control system आणि renewable energy यांना एकत्र जोडतो.</li>
+                </ul>
+                <h3>Future Scope</h3>
+                <ul>
+                    <li>अधिक अचूक tracking साठी sensor calibration आणि सुधारित control logic वापरणे.</li>
+                    <li>दिवस/रात्र ओळख, हवामानानुसार सुरक्षित स्थिती आणि manual control जोडणे.</li>
+                    <li>पॅनेलचा voltage/current मोजून ऊर्जा निर्मितीची नोंद ठेवणे.</li>
+                    <li>मोठ्या पॅनेलसाठी मजबूत motor, संरचना
