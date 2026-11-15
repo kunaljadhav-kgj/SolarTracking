@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Working Principle | Solar Tracking System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { min-height: 100vh; padding: 24px; color: #102a43; background: linear-gradient(135deg, #f0f4f8, #d9e2ec); }
+    main { width: min(100%, 780px); margin: 24px auto; padding: 30px; background: #fff; border-top: 6px solid #f59e0b; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,.08); }
+    .back { display: inline-block; margin-bottom: 20px; color: #64748b; font-weight: 600; text-decoration: none; }
+    .back:hover { color: #b45309; }
+    header { margin-bottom: 24px; padding-bottom: 16px; text-align: center; border-bottom: 2px dashed #e2e8f0; }
+    h1 { color: #1e293b; font-size: clamp(24px, 5vw, 32px); }
+    h2 { margin: 22px 0 8px; color: #334155; font-size: 19px; }
+    p, li { color: #475569; line-height: 1.75; }
+    ol, ul { padding-left: 22px; }
+    li { margin: 8px 0; }
+    .note { margin-top: 20px; padding: 14px 16px; border-left: 4px solid #f59e0b; border-radius: 8px; background: #fffbeb; color: #78350f; line-height: 1.6; }
+    @media (max-width: 520px) { body { padding: 12px; } main { margin: 10px auto; padding: 22px 18px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="starting.html#contents-section">← Back to Contents</a>
+    <header><h1>Working Principle</h1></header>
+    <article>
+      <p>The system uses Light Dependent Resistors (LDRs) to compare light intensity from different directions. An LDR's resistance changes with the amount of light falling on it: brighter light generally lowers its resistance.</p>
+      <h2>Working Process</h2>
+      <ol>
+        <li><strong>Detect sunlight:</strong> LDR sensors placed on different sides of the panel sense the incoming light.</li>
+        <li><strong>Generate signals:</strong> Each LDR and a fixed resistor form a voltage divider that produces a voltage reading.</li>
+        <li><strong>Process readings:</strong> A controller such as an Arduino reads and compares the sensor values.</li>
+        <li><strong>Compare direction:</strong> If one side receives more light, the controller determines which way the panel should turn.</li>
+        <li><strong>Move the panel:</strong> The controller sends a signal to the servo motor to adjust the panel toward the brighter side.</li>
+        <li><strong>Repeat:</strong> The readings are checked continuously so the panel can respond as the sun moves.</li>
+      </ol>
+      <h2>LDR Sensor Logic</h2>
+      <ul>
+        <li>Left LDR receives more light → move toward the left.</li>
+        <li>Right LDR receives more light → move toward the right.</li>
+        <li>Both sensors receive similar light → stop the motor.</li>
+        <li>Low-light conditions → keep the motor stationary.</li>
+      </ul>
+      <div class="note"><strong>Note:</strong> Actual motor direction depends on the sensor arrangement and wiring. A small tolerance can prevent unnecessary movement when readings are nearly equal.</div>
+    </article>
+  </main>
+</body>
+</html>
