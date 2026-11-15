@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Tracking System</title>
+    <style>
+        /* साधी आणि आकर्षक डिझाइन (Clean & Modern CSS) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #102a43;
+        }
+
+        /* मुख्य बॉक्स (तुमच्या ड्रॉइंगमधील चौकोनासारखा) */
+        .main-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            padding: 40px 30px;
+            border-top: 6px solid #f59e0b; /* सूर्याचा पिवळा-केशरी रंग */
+            transition: all 0.3s ease;
+        }
+
+        /* शीर्षक: Solar Tracking System */
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #e2e8f0;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #1e293b;
+            letter-spacing: 1px;
+        }
+
+        .header span {
+            color: #f59e0b;
+        }
+
+        /* मेनू पर्याय (Team members, About Us, Track Solar) */
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .menu-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item::before {
+            content: "•";
+            color: #f59e0b;
+            font-size: 24px;
+            margin-right: 12px;
+            line-height: 1;
+        }
+
+        .menu-item:hover {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            transform: translateX(5px);
+            color: #b45309;
+        }
+
+        /* START बटण */
+        .start-btn-container {
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 14px 45px;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+        }
+
+        .start-btn:active {
+            transform: translateY(0);
+        }
+
+        /* माहिती दाखवणारे सेक्शन्स (लपवलेले, क्लिक केल्यावर दिसतील) */
+        .section-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            color: #0f172a;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .login-form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .login-form label {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .login-form input:focus {
+            outline: 2px solid #f59e0b;
+            border-color: transparent;
+        }
+
+        .login-error {
+            color: #b91c1c;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        /* सोलर ट्रॅकिंग डेमो बार */
+        .tracker-display {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sun-angle {
+            font-size: 36px;
+            font-weight: bold;
+            color: #d97706;
+            margin: 10px 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: #f59e0b;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <div id="login-section" class="section-content active">
+            <div class="header">
+                <h1><span>-</span> Project Login <span>-</span></h1>
+            </div>
+            <form class="login-form" onsubmit="login(event)">
+                <label for="login-pin">Enter PIN (1 to 4)</label>
+                <input id="login-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="Enter 1234" required>
+                <p id="login-error" class="login-error" role="alert"></p>
+                <button class="start-btn" type="submit">LOGIN</button>
+            </form>
+        </div>
+
+        <!-- 1. होम पेज (तुमच्या इमेजप्रमाणे) -->
+        <div id="home-section" class="section-content">
+            <div class="header">
+                <h1><span>-</span> Solar Tracking System <span>-</span></h1>
+            </div>
+
+            <ul class="menu-list">
+                <li class="menu-item" onclick="showSection('team-section')">Team members</li>
+                <li class="menu-item" onclick="showSection('about-section')">About Us</li>
+                <li class="menu-item" onclick="showSection('track-section')">Track Solar</li>
+            </ul>
+
+            <div class="start-btn-container">
+                <button class="start-btn" onclick="window.location.href='parameters.html'">- START -</button>
+            </div>
+        </div>
+
+        <!-- 2. Team Members सेक्शन -->
+        <div id="team-section" class="section-content">
+            <button class="back-btn" onclick="showSection('home-section')">← Back to Home</button>
+            <div class="header">
+                <h1>Team Members</h1>
+            </div>
+            <div class="info-box">
+                <p><strong>1. <abbr title ="VU2F2627084">Kunal Jadhav</abbr></strong> <br>
+                - Project Lead & Hardware</p><br>
+                <p><strong>2. <abbr title="VU2F2627071">Parth Ade</abbr></strong> <br> 
+                - Software & Coding</p></br>
+                <p><strong>3. <abbr title="VU2F2627074">Sahil</abbr></strong> <br>
+                - Circuit Design & Testing</p><br>
+                <p><strong>4. <abbr title="VU2F26270">member 4</abbr></strong> <br> 
+                - Documentation</p><br>
+                <p><strong>5. <abbr title="VU2F26270">member 5</abbr></strong> </p><br>
+                <p><strong>6. <abbr title="">Member Name 4</abbr></strong> </p>
+            </div>
+        </div>
+
+        <!-- 3. About Us सेक्शन -->
+        <div id="about-section" class="section-content">
+            <button class="back-btn" onclick="showSection('home-section')">← Back to Home</button>
+            <div class="header">
+                <h1>About Us</h1>
+            </div>
+            <div class="info-box">
+                <p><h3>Branch:  <abbr title="COMPUTER SCIENCE ENGINEERING (ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING)">CSE(AIML)</abbr></h3><br>
+                <h3>Div:   B</h3><br>
+                <h3>Batch:  A</h3></br>
+                <h3>Group:  A</h3>
+                
+                </p>
+            </div>
+        </div>
+
+        <!-- 4. Track Solar / START सेक्शन -->
+        <div id="track-section" class="section-content">
+            <button class="back-btn" onclick="showSection('home-section')">← Back to Home</button>
+            <div class="header">
+                <h1>Live Solar Tracker</h1>
+            </div>
+            <div class="info-box tracker-display">
+                <p> Solar Panel Angle:</p>
+                <div class="sun-angle" id="angle-value">90°</div>
+                <p id="status-text">Status: Optimal Sunlight (Afternoon Time)</p>
+                
+                <label for="sun-slider" style="display:block; margin-top:20px; font-size:14px; color:#64748b;">
+                    Simulate Sun Position :
+                </label>
+                <input type="range" id="sun-slider" min="0" max="180" value="90" oninput="updateTracker(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Login PIN is 1234 (digits 1, 2, 3, and 4).
+        function login(event) {
+            event.preventDefault();
+            const pin = document.getElementById('login-pin').value;
+
+            if (pin === '1234') {
+                sessionStorage.setItem('solarProjectLoggedIn', 'true');
+                showSection('home-section');
+            } else {
+                document.getElementById('login-error').innerText = 'Incorrect PIN. Please enter 1234.';
+            }
+        }
+
+        // पेज बदलण्यासाठी फंक्शन
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(sec => sec.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // सोलर ट्रॅकिंग डेमो अपडेट करण्यासाठी फंक्शन
+        function updateTracker(angle) {
+            document.getElementById('angle-value').innerText = angle + "°";
+            const status = document.getElementById('status-text');
+            
+            if (angle < 60) {
+                status.innerText = "Status: East Facing (Morning Time)";
+            } else if (angle <= 120) {
+                status.innerText = "Status: Optimal Sunlight (Afternoon Time)";
+            } else {
+                status.innerText = "Status: West Facing (Evening Time)";
+            }
+        }
+
+        // Keep the project home accessible after login when returning from another page.
+        if (sessionStorage.getItem('solarProjectLoggedIn') === 'true') {
+            showSection('home-section');
+        }
+    </script>
+
+</body>
+  </html>
+  
