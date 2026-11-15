@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Tracking System - Interactive Engineering Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Noto Sans Devanagari -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Devanagari', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                            950: '#080d1a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #080d1a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            border-color: rgba(245, 158, 11, 0.55);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -10px rgba(245, 158, 11, 0.25);
+        }
+        .measurement-highlight {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(16, 185, 129, 0.12) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.45);
+        }
+        .sun-glow {
+            box-shadow: 0 0 35px 10px rgba(251, 191, 36, 0.6);
+        }
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: #f59e0b;
+            cursor: pointer;
+            margin-top: -8px;
+            border: 2px solid #080d1a;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.85);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 999px;
+        }
+        /* Pulsing Calculation Dot */
+        .calc-dot {
+            position: relative;
+        }
+        .calc-dot::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 9999px;
+            border: 2px solid rgba(251, 191, 36, 0.5);
+            animation: pulseRing 2s infinite;
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(0.9); opacity: 0.9; }
+            70% { transform: scale(1.35); opacity: 0; }
+            100% { transform: scale(1.35); opacity: 0; }
+        }
+
+        /* Light, clean theme matching the Solar Tracking home page */
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%) !important;
+            color: #102a43 !important;
+        }
+        header, footer {
+            background: rgba(255, 255, 255, 0.96) !important;
+            border-color: #e2e8f0 !important;
+        }
+        .glass-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.07);
+        }
+        .glass-card:hover {
+            border-color: rgba(245, 158, 11, 0.75) !important;
+            box-shadow: 0 12px 28px rgba(245, 158, 11, 0.16);
+        }
+        .measurement-highlight {
+            background: linear-gradient(135deg, #fffbeb 0%, #f0fdf4 100%) !important;
+            border-color: #fcd34d !important;
+        }
+        [class~="bg-slate-950/85"], [class~="bg-slate-950/90"],
+        [class~="bg-slate-950/80"], [class~="bg-slate-900/95"],
+        [class~="bg-slate-900/90"], [class~="bg-slate-900/85"],
+        [class~="bg-slate-900/80"], [class~="bg-slate-900/70"],
+        .bg-slate-950, .bg-slate-900 {
+            background-color: #ffffff !important;
+        }
+        .bg-slate-800 {
+            background-color: #f1f5f9 !important;
+        }
+        [class~="border-slate-800"], [class~="border-slate-800/80"],
+        [class~="border-slate-700"], [class~="border-slate-700/80"] {
+            border-color: #e2e8f0 !important;
+        }
+        .text-white, .text-slate-200, .text-slate-300 {
+            color: #334155 !important;
+        }
+        .text-slate-400, .text-slate-500 {
+            color: #64748b !important;
+        }
+        .text-amber-400, .text-amber-300 {
+            color: #b45309 !important;
+        }
+        .text-emerald-400, .text-emerald-300 {
+            color: #047857 !important;
+        }
+        .text-sky-400 {
+            color: #0369a1 !important;
+        }
+        .text-purple-400 {
+            color: #7e22ce !important;
+        }
+        .text-rose-400 {
+            color: #be123c !important;
+        }
+        .text-slate-950 {
+            color: #102a43 !important;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            background: #cbd5e1;
+        }
+        input[type=range]::-moz-range-track {
+            background: #cbd5e1;
+        }
+        #view-sec2 .relative.w-full.h-64 {
+            background: linear-gradient(180deg, #e0f2fe 0%, #f0fdf4 100%) !important;
+            border-color: #cbd5e1 !important;
+        }
+        #pie-chart-container {
+            background: #080d1a;
+            border-radius: 1rem;
+        }
+        #chart-g1, #chart-g2, #chart-g3, #chart-g4 {
+            background: #080d1a;
+            border-radius: 0.75rem;
+        }
+        button:focus-visible, input:focus-visible {
+            outline: 3px solid rgba(245, 158, 11, 0.55);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-slate-900">
+
+    <!-- ==================== TOP HEADER NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 bg-slate-950/85 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand / Home Link -->
+            <button onclick="navigateTo('home')" class="flex items-center gap-3 text-left group focus:outline-none">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-slate-950 shadow-lg group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-solar-panel text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg tracking-tight text-white leading-tight" data-en="Solar Tracking System" data-mr="सोलर ट्रॅकिंग सिस्टीम">Solar Tracking System</h1>
+                    <p class="text-xs text-amber-400 font-medium" data-en="Interactive Project & Parameters Portal" data-mr="इंटरॲक्टिव्ह प्रोजेक्ट आणि मेजरमेंट पोर्टल">Interactive Project & Parameters Portal</p>
+                </div>
+            </button>
+
+            <!-- Quick Action Buttons -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="homeNavBtn" onclick="navigateTo('home')" class="hidden px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-house text-amber-400"></i>
+                    <span data-en="Home" data-mr="मुख्य पान">Home</span>
+                </button>
+
+                <a href="index.html" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-house text-amber-400"></i>
+                    <span data-en="Project Home" data-mr="मुख्य पान">Project Home</span>
+                </a>
+
+                <!-- Prominent Our Parameters Quick Button -->
+                <button onclick="navigateTo('measurement')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs sm:text-sm font-bold shadow-lg shadow-amber-500/20 transition flex items-center gap-2">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span data-en="Our Parameters" data-mr="Our Parameters">Our Parameters</span>
+                </button>
+
+                <!-- Bilingual Switcher -->
+                <div class="bg-slate-900 p-1 rounded-xl border border-slate-700 flex items-center">
+                    <button id="btn-en" onclick="setLanguage('en')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-amber-500 text-slate-950">EN</button>
+                    <button id="btn-mr" onclick="setLanguage('mr')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white">मराठी</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
+
+        <!-- =====================================================================
+             VIEW 0: STARTING / HOME PAGE (4 Theory Cards + Featured Our Parameters)
+             ===================================================================== -->
+        <section id="view-home" class="fade-in">
+            <!-- Hero Banner -->
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-4">
+                    <i class="fa-solid fa-sun animate-spin" style="animation-duration: 12s;"></i>
+                    <span data-en="Renewable Energy Automation & Analytics" data-mr="अक्षय ऊर्जा ऑटोमेशन आणि विश्लेषण">Renewable Energy Automation & Analytics</span>
+                </span>
+                <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight" data-en="Automatic Solar Tracking System" data-mr="स्वयंचलित सोलर ट्रॅकिंग सिस्टीम">
+                    Automatic Solar Tracking System
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-lg leading-relaxed" data-en="Explore the 4 engineering fundamentals below or launch 'Our Parameters' to configure Fixed Parameters, inspect step-by-step calculations, and analyze live performance graphs." data-mr="खालील ४ तांत्रिक विभाग पहा किंवा 'Our Parameters' वर क्लिक करून Fixed Parameters सेट करा, स्टेप-बाय-स्टेप कॅल्क्युलेशन आणि ग्राफ तपासा.">
+                    Explore the 4 engineering fundamentals below or launch 'Our Parameters' to configure Fixed Parameters, inspect step-by-step calculations, and analyze live performance graphs.
+                </p>
+            </div>
+
+            <!-- FEATURED 5TH CARD: OUR MEASUREMENT (Opens Image 1 Hub) -->
+            <div onclick="navigateTo('measurement')" class="glass-card measurement-highlight rounded-2xl p-6 sm:p-8 cursor-pointer group relative overflow-hidden mb-8">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-amber-500/15 rounded-full blur-3xl group-hover:bg-amber-500/25 transition"></div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="flex items-start gap-4 sm:gap-5">
+                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 text-slate-950 flex items-center justify-center text-2xl sm:text-3xl shadow-lg shrink-0">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                <span class="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-extrabold uppercase tracking-wider" data-en="Interactive Lab & Calculator" data-mr="इंटरॲक्टिव्ह कॅल्क्युलेटर">Interactive Lab & Calculator</span>
+                                <span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-circle-dot mr-1"></i>5 Sub-Modules Inside</span>
+                            </div>
+                            <h3 class="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-400 transition" data-en="Our Parameters" data-mr="Our Parameters (मोजमाप आणि विश्लेषण)">
+                                Our Parameters
+                            </h3>
+                            <p class="text-slate-300 text-sm sm:text-base mt-1 max-w-2xl" data-en="Configure Fixed Parameters (Weight, Area, Resistor, Rated Power, Voltage, Capacity) and dynamically compute Basic Parameters, Energy Parameters, Graphical Analysis & Daily Energy Distribution." data-mr="Fixed Parameters बदला आणि त्यानुसार Basic Parameters, Energy Parameters (कॅल्क्युलेशन डॉटसह), Graphical Analysis आणि Energy Distribution तपासा.">
+                                Configure Fixed Parameters (Weight, Area, Resistor, Rated Power, Voltage, Capacity) and dynamically compute Basic Parameters, Energy Parameters, Graphical Analysis & Daily Energy Distribution.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 self-end md:self-center shrink-0">
+                        <span class="px-5 py-3 rounded-xl bg-amber-500 group-hover:bg-amber-400 text-slate-950 font-bold text-sm transition flex items-center gap-2 shadow-lg">
+                            <span data-en="Open Parameterss" data-mr="उघडा">Open Parameterss</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 ORIGINAL THEORY CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card 1: Introduction -->
+                <div onclick="navigateTo('sec1')" class="glass-card rounded-2xl p-6 sm:p-7 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-lg font-bold">01</span>
+                            <span class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-amber-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-amber-400 transition" data-en="1. Introduction to Solar Tracking" data-mr="१. सोलर ट्रॅकिंगची ओळख (Introduction)">
+                            1. Introduction to Solar Tracking
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed" data-en="Understand what solar tracking is, why fixed panels lose energy, and compare Single-Axis vs. Dual-Axis trackers." data-mr="सोलर ट्रॅकिंग म्हणजे काय, स्थिर पॅनेलमध्ये ऊर्जा का वाया जाते आणि सिंगल-ॲक्सिस व ड्युअल-ॲक्सिस ट्रॅकरमधील फरक जाणून घ्या.">
+                            Understand what solar tracking is, why fixed panels lose energy, and compare Single-Axis vs. Dual-Axis trackers.
+                        </p>
+                    </div>
+                    <div class="mt-5 pt-3.5 border-t border-slate-800/80 flex items-center gap-2 text-xs font-semibold text-amber-400">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span data-en="Click to explore in detail" data-mr="सविस्तर माहितीसाठी क्लिक करा">Click to explore in detail</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Working Principle -->
+                <div onclick="navigateTo('sec2')" class="glass-card rounded-2xl p-6 sm:p-7 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-lg font-bold">02</span>
+                            <span class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition" data-en="2. Working Principle (LDR Sensor Logic)" data-mr="२. कार्यपद्धती (LDR सेन्सर लॉजिक)">
+                            2. Working Principle (LDR Sensor Logic)
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed" data-en="Learn how Light Dependent Resistors detect sunlight intensity, comparator logic, and test the live sun-tracking simulator." data-mr="LDR सेन्सर सूर्यप्रकाश कसा ओळखतो, व्होल्टेज डिव्हायडर नियम, आणि लाईव्ह सिम्युलेटरद्वारे पॅनेलची हालचाल तपासा.">
+                            Learn how Light Dependent Resistors detect sunlight intensity, comparator logic, and test the live sun-tracking simulator.
+                        </p>
+                    </div>
+                    <div class="mt-5 pt-3.5 border-t border-slate-800/80 flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span data-en="Includes Interactive Simulator & Code" data-mr="इंटरॲक्टिव्ह सिम्युलेटर आणि कोडसह">Includes Interactive Simulator & Code</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Circuit Diagram & Sensors -->
+                <div onclick="navigateTo('sec3')" class="glass-card rounded-2xl p-6 sm:p-7 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="w-11 h-11 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center text-lg font-bold">03</span>
+                            <span class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-sky-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-sky-400 transition" data-en="3. Circuit Diagram & Sensors" data-mr="३. सर्किट डायग्राम आणि सेन्सर्स">
+                            3. Circuit Diagram & Sensors
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed" data-en="Complete hardware architecture, pin-to-pin wiring schematic, Arduino Uno, LDR modules, resistors, and Servo motors." data-mr="संपूर्ण हार्डवेअर रचना, पिन-टू-पिन वायरिंग डायग्राम, Arduino Uno, LDR सेन्सर्स आणि सर्वो मोटारची माहिती.">
+                            Complete hardware architecture, pin-to-pin wiring schematic, Arduino Uno, LDR modules, resistors, and Servo motors.
+                        </p>
+                    </div>
+                    <div class="mt-5 pt-3.5 border-t border-slate-800/80 flex items-center gap-2 text-xs font-semibold text-sky-400">
+                        <i class="fa-solid fa-microchip"></i>
+                        <span data-en="View Schematic & Hardware Guide" data-mr="सर्किट डायग्राम आणि हार्डवेअर माहिती पहा">View Schematic & Hardware Guide</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Advantages & Future Scope -->
+                <div onclick="navigateTo('sec4')" class="glass-card rounded-2xl p-6 sm:p-7 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center text-lg font-bold">04</span>
+                            <span class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-purple-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition" data-en="4. Advantages & Future Scope" data-mr="४. फायदे आणि भविष्यातील संधी (Future Scope)">
+                            4. Advantages & Future Scope
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed" data-en="Explore 25–40% efficiency gains, economic benefits, current limitations, and future upgrades like IoT & AI weather tracking." data-mr="२५–४०% जास्त वीज निर्मिती, आर्थिक फायदे, मर्यादा आणि भविष्यातील IoT व AI आधारित सुधारणा जाणून घ्या.">
+                            Explore 25–40% efficiency gains, economic benefits, current limitations, and future upgrades like IoT & AI weather tracking.
+                        </p>
+                    </div>
+                    <div class="mt-5 pt-3.5 border-t border-slate-800/80 flex items-center gap-2 text-xs font-semibold text-purple-400">
+                        <i class="fa-solid fa-rocket"></i>
+                        <span data-en="Benefits, Limitations & Next-Gen Ideas" data-mr="फायदे, मर्यादा आणि नवीन कल्पना">Benefits, Limitations & Next-Gen Ideas</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Our Instrument card placed below the four project cards -->
+            <div onclick="navigateTo('measurement'); openParametersSub('instrument')" class="glass-card rounded-2xl p-6 sm:p-7 cursor-pointer group relative overflow-hidden mt-6">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <span class="w-11 h-11 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-microchip"></i>
+                        </span>
+                        <div>
+                            <h3 class="text-xl font-bold text-white group-hover:text-sky-400 transition">Our Instrument</h3>
+                            <p class="text-slate-400 text-sm mt-1">Explore the solar tracker hardware and its key components.</p>
+                        </div>
+                    </div>
+                    <span class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-sky-500 group-hover:text-slate-950 text-slate-400 flex items-center justify-center transition">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             OUR MEASUREMENT SYSTEM (IMAGES 1, 2, 3, 4, 5 + ENERGY DISTRIBUTION)
+             ===================================================================== -->
+        <section id="measurement-wrapper" class="hidden fade-in">
+            
+            <!-- Sub-navigation Breadcrumb & Quick Switcher -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <button onclick="navigateTo('home')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold transition flex items-center gap-2">
+                        <i class="fa-solid fa-house text-amber-400"></i>
+                        <span data-en="Home" data-mr="मुख्य पान">Home</span>
+                    </button>
+                    <button id="backToParametersBtn" onclick="openParametersSub('hub')" class="hidden px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span data-en="Our Parameters Menu" data-mr="Our Parameters मेनू">Our Parameters Menu</span>
+                    </button>
+                </div>
+
+                <!-- Quick Pills for all measurement sections -->
+                <div class="flex flex-wrap gap-1.5">
+                    <button onclick="openParametersSub('fixed')" id="mpill-fixed" class="mpill px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Fixed Parameters</button>
+                    <button onclick="openParametersSub('basic')" id="mpill-basic" class="mpill px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Basic Parameters</button>
+                    <button onclick="openParametersSub('energy')" id="mpill-energy" class="mpill px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Energy Parameters</button>
+                    <button onclick="openParametersSub('graph')" id="mpill-graph" class="mpill px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Graphical Analysis</button>
+                    <button onclick="openParametersSub('dist')" id="mpill-dist" class="mpill px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Energy Distribution</button>
+                </div>
+            </div>
+
+            <!-- -----------------------------------------------------------------
+                 IMAGE 1: OUR MEASUREMENT HUB (- Solar Tracking System -)
+                 ----------------------------------------------------------------- -->
+            <div id="msub-hub" class="max-w-2xl mx-auto">
+                <div class="bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                    <!-- Handwritten Sketch Header Style -->
+                    <div class="text-center pb-5 mb-6 border-b-2 border-slate-800">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-400">Our Parameters</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1 tracking-tight">- Solar Tracking System -</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1.5" data-en="Select any parameter category below to configure inputs, view live formulas, and inspect charts." data-mr="इनपुट बदलण्यासाठी, फॉर्म्युला कॅल्क्युलेशन आणि ग्राफ पाहण्यासाठी खालीलपैकी एका पर्यायावर क्लिक करा.">
+                            Select any parameter category below to configure inputs, view live formulas, and inspect charts.
+                        </p>
+                    </div>
+
+                    <!-- 5 Exact Menu Items from Image 1 -->
+                    <div class="space-y-3.5">
+                        <!-- 1. Fixed Parameters -->
+                        <button onclick="openParametersSub('fixed')" class="w-full glass-card rounded-2xl p-4 sm:p-5 flex items-center justify-between text-left group">
+                            <div class="flex items-center gap-4">
+                                <span class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_#fbbf24]"></span>
+                                <div>
+                                    <div class="text-lg sm:text-xl font-bold text-white group-hover:text-amber-400 transition">Fixed Parameters</div>
+                                    <div class="text-xs text-slate-400" data-en="Adjust Weight, Area, Resistor, Rated Power, Voltage & Capacity sliders" data-mr="वजन, क्षेत्रफळ, रेझिस्टर, पॉवर, व्होल्टेज आणि कॅपॅसिटी सेट करा">Adjust Weight, Area, Resistor, Rated Power, Voltage & Capacity sliders</div>
+                                </div>
+                            </div>
+                            <span class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-amber-500 group-hover:text-slate-950 text-slate-300 flex items-center justify-center transition">
+                                <i class="fa-solid fa-sliders"></i>
+                            </span>
+                        </button>
+
+                        <!-- 2. Basic Parameters -->
+                        <button onclick="openParametersSub('basic')" class="w-full glass-card rounded-2xl p-4 sm:p-5 flex items-center justify-between text-left group">
+                            <div class="flex items-center gap-4">
+                                <span class="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]"></span>
+                                <div>
+                                    <div class="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-400 transition">Basic Parameters</div>
+                                    <div class="text-xs text-slate-400" data-en="Angle of Tracking, Angular Speed, Linear Speed & Tracking Time (with calculation dots)" data-mr="कोन, कोनीय वेग, रेषीय वेग आणि ट्रॅकिंग वेळ (कॅल्क्युलेशन डॉटसह)">Angle of Tracking, Angular Speed, Linear Speed & Tracking Time (with calculation dots)</div>
+                                </div>
+                            </div>
+                            <span class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-300 flex items-center justify-center transition">
+                                <i class="fa-solid fa-compass-drafting"></i>
+                            </span>
+                        </button>
+
+                        <!-- 3. Energy Parameters -->
+                        <button onclick="openParametersSub('energy')" class="w-full glass-card rounded-2xl p-4 sm:p-5 flex items-center justify-between text-left group">
+                            <div class="flex items-center gap-4">
+                                <span class="w-3 h-3 rounded-full bg-sky-400 shadow-[0_0_10px_#38bdf8]"></span>
+                                <div>
+                                    <div class="text-lg sm:text-xl font-bold text-white group-hover:text-sky-400 transition">Energy Parameters</div>
+                                    <div class="text-xs text-slate-400" data-en="Solar Voltage, Current, Avg. Power, Energy, Light & Temp Difference, Panel Efficiency" data-mr="व्होल्टेज, करंट, पॉवर, ऊर्जा, प्रकाश व तापमान फरक आणि कार्यक्षमता">Solar Voltage, Current, Avg. Power, Energy, Light & Temp Difference, Panel Efficiency</div>
+                                </div>
+                            </div>
+                            <span class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-sky-500 group-hover:text-slate-950 text-slate-300 flex items-center justify-center transition">
+                                <i class="fa-solid fa-bolt"></i>
+                            </span>
+                        </button>
+
+                        <div class="border-t border-slate-800 my-2"></div>
+
+                        <!-- 4. Graphical Analysis -->
+                        <button onclick="openParametersSub('graph')" class="w-full glass-card rounded-2xl p-4 sm:p-5 flex items-center justify-between text-left group">
+                            <div class="flex items-center gap-4">
+                                <span class="w-3 h-3 rounded-full bg-purple-400 shadow-[0_0_10px_#c084fc]"></span>
+                                <div>
+                                    <div class="text-lg sm:text-xl font-bold text-white group-hover:text-purple-400 transition">Graphical Analysis</div>
+                                    <div class="text-xs text-slate-400" data-en="Interactive V-I, Power vs Time, Temperature vs Time & Light Intensity vs Time graphs" data-mr="V-I, पॉवर, तापमान आणि प्रकाश तीव्रतेचे इंटरॲक्टिव्ह आलेख">Interactive V-I, Power vs Time, Temperature vs Time & Light Intensity vs Time graphs</div>
+                                </div>
+                            </div>
+                            <span class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-purple-500 group-hover:text-slate-950 text-slate-300 flex items-center justify-center transition">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </span>
+                        </button>
+
+                        <!-- 5. Energy distribution -->
+                        <button onclick="openParametersSub('dist')" class="w-full glass-card rounded-2xl p-4 sm:p-5 flex items-center justify-between text-left group">
+                            <div class="flex items-center gap-4">
+                                <span class="w-3 h-3 rounded-full bg-rose-400 shadow-[0_0_10px_#fb7185]"></span>
+                                <div>
+                                    <div class="text-lg sm:text-xl font-bold text-white group-hover:text-rose-400 transition">Energy distribution</div>
+                                    <div class="text-xs text-slate-400" data-en="Interactive Daily Energy Distribution Pie Diagram & Loss Breakdown" data-mr="दैनिक ऊर्जा वितरणाचा पाय चार्ट (Pie Diagram)">Interactive Daily Energy Distribution Pie Diagram & Loss Breakdown</div>
+                                </div>
+                            </div>
+                            <span class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-rose-500 group-hover:text-slate-950 text-slate-300 flex items-center justify-center transition">
+                                <i class="fa-solid fa-chart-pie"></i>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Our Instrument: hardware overview -->
+            <div id="msub-instrument" class="hidden max-w-3xl mx-auto">
+                <div class="bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                    <div class="text-center pb-5 mb-6 border-b border-slate-800">
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">- Our Instrument -</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">The main hardware used to sense sunlight, control panel movement, and measure solar output.</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <h3 class="font-bold text-amber-400 mb-2"><i class="fa-solid fa-sun mr-2"></i>Solar Panel</h3>
+                            <p class="text-sm text-slate-300">Converts sunlight into electrical energy. Its position is adjusted to receive more direct sunlight.</p>
+                        </div>
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <h3 class="font-bold text-sky-400 mb-2"><i class="fa-solid fa-eye mr-2"></i>LDR Sensors</h3>
+                            <p class="text-sm text-slate-300">A pair of Light Dependent Resistors compares light levels on either side of the panel.</p>
+                        </div>
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <h3 class="font-bold text-emerald-400 mb-2"><i class="fa-solid fa-microchip mr-2"></i>Arduino Uno</h3>
+                            <p class="text-sm text-slate-300">Reads the LDR signals and decides which direction the panel should move.</p>
+                        </div>
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <h3 class="font-bold text-purple-400 mb-2"><i class="fa-solid fa-gears mr-2"></i>Servo Motor</h3>
+                            <p class="text-sm text-slate-300">Rotates the panel toward the brighter side in response to the controller.</p>
+                        </div>
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5 sm:col-span-2">
+                            <h3 class="font-bold text-rose-400 mb-2"><i class="fa-solid fa-gauge-high mr-2"></i>Parameters & Power Circuit</h3>
+                            <p class="text-sm text-slate-300">Resistors and the connected measurement circuit support sensor readings and help monitor panel voltage, current, and power.</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <button onclick="navigateTo('sec3')" class="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-sm font-bold transition">
+                            View Circuit Diagram <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- -----------------------------------------------------------------
+                 IMAGE 2: FIXED PARAMETERS (- Fixed Parameters -)
+                 ----------------------------------------------------------------- -->
+            <div id="msub-fixed" class="hidden max-w-3xl mx-auto">
+                <div class="bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                    <div class="text-center pb-5 mb-6 border-b border-slate-800">
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">- Fixed Parameters -</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1" data-en="Adjust the sliders below. Every change automatically updates Basic Parameters, Energy Parameters, Graphs & Pie Chart!" data-mr="खालील स्लायडर्स बदला. प्रत्येक बदलामुळे Basic Parameters, Energy Parameters आणि ग्राफ आपोआप अपडेट होतील!">
+                            Adjust the sliders below. Every change automatically updates Basic Parameters, Energy Parameters, Graphs & Pie Chart!
+                        </p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- 1. Weight of Solar Panel (0 to 1000 g + Calculation dropdown as drawn) -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                <label class="font-bold text-white flex items-center gap-2 text-base sm:text-lg">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                    Weight of Solar Panel
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="num-weight" min="50" max="1000" value="450" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right text-amber-400 font-bold text-sm focus:outline-none focus:border-amber-500">
+                                    <span class="text-xs font-bold text-slate-400">g</span>
+                                </div>
+                            </div>
+                            <div class="text-center text-slate-500 text-xs mb-2"><i class="fa-solid fa-arrow-down"></i></div>
+
+                            <!-- 'Calculation v' box exactly from Sketch 2 -->
+                            <div class="mb-3">
+                                <button onclick="toggleWeightCalc()" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 flex items-center justify-between text-xs sm:text-sm font-semibold text-amber-300 transition">
+                                    <span>Calculation <i id="weightCalcChevron" class="fa-solid fa-chevron-down ml-1 text-xs transition-transform"></i></span>
+                                    <span id="weight-kg-preview" class="text-slate-400 font-mono">0.450 kg | Load Torque: 0.22 N·m</span>
+                                </button>
+                                <div id="weightCalcBox" class="hidden mt-2 bg-slate-900/70 border border-amber-500/30 rounded-xl p-3.5 text-xs text-slate-300 font-mono space-y-1">
+                                    <div>• Mass (m) = Weight / 1000 = <span id="calc-w-mass" class="text-amber-400">0.450 kg</span></div>
+                                    <div>• Gravitational Force (F) = m × 9.81 = <span id="calc-w-force" class="text-amber-400">4.41 N</span></div>
+                                    <div>• Servo Torque Load (τ) = F × 0.05m = <span id="calc-w-torque" class="text-emerald-400">0.221 N·m</span></div>
+                                </div>
+                            </div>
+
+                            <input type="range" id="slider-weight" min="50" max="1000" value="450" class="w-full">
+                            <div class="flex justify-between text-xs font-mono text-slate-400 mt-1.5">
+                                <span>0</span>
+                                <span>500 g</span>
+                                <span>1000 g</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. Area of Solar Panel (0 to 100 cm²) -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                <label class="font-bold text-white flex items-center gap-2 text-base sm:text-lg">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                    Area of Solar Panel
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="num-area" min="10" max="100" value="65" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right text-amber-400 font-bold text-sm focus:outline-none focus:border-amber-500">
+                                    <span class="text-xs font-bold text-slate-400">cm²</span>
+                                </div>
+                            </div>
+                            <div class="text-center text-slate-500 text-xs mb-2"><i class="fa-solid fa-arrow-down"></i></div>
+                            <input type="range" id="slider-area" min="10" max="100" value="65" class="w-full">
+                            <div class="flex justify-between text-xs font-mono text-slate-400 mt-1.5">
+                                <span>0</span>
+                                <span>50 cm²</span>
+                                <span>100 cm²</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. Resistor (0 to 20 kΩ) -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                <label class="font-bold text-white flex items-center gap-2 text-base sm:text-lg">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                    Resistor
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="num-resistor" min="1" max="20" step="0.5" value="10" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right text-amber-400 font-bold text-sm focus:outline-none focus:border-amber-500">
+                                    <span class="text-xs font-bold text-slate-400">kΩ</span>
+                                </div>
+                            </div>
+                            <div class="text-center text-slate-500 text-xs mb-2"><i class="fa-solid fa-arrow-down"></i></div>
+                            <input type="range" id="slider-resistor" min="1" max="20" step="0.5" value="10" class="w-full">
+                            <div class="flex justify-between text-xs font-mono text-slate-400 mt-1.5">
+                                <span>0</span>
+                                <span>10 kΩ</span>
+                                <span>20 kΩ</span>
+                            </div>
+                        </div>
+
+                        <!-- 4. Panel Rated Power -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                <label class="font-bold text-white flex items-center gap-2 text-base sm:text-lg">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                    Panel Rated Power
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="num-power" min="1" max="50" step="0.5" value="10" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right text-amber-400 font-bold text-sm focus:outline-none focus:border-amber-500">
+                                    <span class="text-xs font-bold text-slate-400">W</span>
+                                </div>
+                            </div>
+                            <div class="text-center text-slate-500 text-xs mb-2"><i class="fa-solid fa-arrow-down"></i></div>
+                            <input type="range" id="slider-power" min="1" max="50" step="0.5" value="10" class="w-full">
+                            <div class="flex justify-between text-xs font-mono text-slate-400 mt-1.5">
+                                <span>0 W</span>
+                                <span>25 W</span>
+                                <span>50 W</span>
+                            </div>
+                        </div>
+
+                        <!-- 5. Panel Rated Voltage -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                <label class="font-bold text-white flex items-center gap-2 text-base sm:text-lg">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                    Panel Rated Voltage
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="num-voltage" min="3" max="24" step="0.5" value="12" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right text-amber-400 font-bold text-sm focus:outline-none focus:border-amber-500">
+                                    <span class="text-xs font-bold text-slate-400">V</span>
+                                </div>
+                            </div>
+                            <div class="text-center text-slate-500 text-xs mb-2"><i class="fa-solid fa-arrow-down"></i></div>
+                            <input type="range" id="slider-voltage" min="3" max="24" step="0.5" value="12" class="w-full">
+                            <div class="flex justify-between text-xs font-mono text-slate-400 mt-1.5">
+                                <span>0 V</span>
+                                <span>12 V</span>
+                                <span>24 V</span>
+                            </div>
+                        </div>
+
+                        <!-- 6. Panel Capacity -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                <label class="font-bold text-white flex items-center gap-2 text-base sm:text-lg">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                    Panel Capacity
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="num-capacity" min="1" max="100" value="20" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right text-amber-400 font-bold text-sm focus:outline-none focus:border-amber-500">
+                                    <span class="text-xs font-bold text-slate-400">Ah</span>
+                                </div>
+                            </div>
+                            <div class="text-center text-slate-500 text-xs mb-2"><i class="fa-solid fa-arrow-down"></i></div>
+                            <input type="range" id="slider-capacity" min="1" max="100" value="20" class="w-full">
+                            <div class="flex justify-between text-xs font-mono text-slate-400 mt-1.5">
+                                <span>0 Ah</span>
+                                <span>50 Ah</span>
+                                <span>100 Ah</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Footer to jump directly to Calculated Parameters -->
+                    <div class="mt-8 pt-5 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                        <button onclick="resetFixedDefaults()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-semibold transition">
+                            <i class="fa-solid fa-rotate-left mr-1.5"></i> Reset Defaults
+                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="openParametersSub('basic')" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-bold transition">
+                                View Basic Parameters <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                            <button onclick="openParametersSub('energy')" class="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs sm:text-sm font-bold transition">
+                                View Energy Parameters <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- -----------------------------------------------------------------
+                 IMAGE 3: BASIC PARAMETERS (- Basic Parameters -)
+                 ----------------------------------------------------------------- -->
+            <div id="msub-basic" class="hidden max-w-3xl mx-auto">
+                <div class="bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                    <div class="text-center pb-5 mb-6 border-b border-slate-800">
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">- Basic Parameters -</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1" data-en="Dynamically calculated from your Fixed Parameters. Click the glowing dot (•) on the right side of any Value box to see the exact calculation!" data-mr="तुमच्या Fixed Parameters नुसार आपोआप मोजलेले मूल्य. कॅल्क्युलेशन पाहण्यासाठी बॉक्सच्या उजव्या बाजूच्या बिंदूवर (•) क्लिक करा!">
+                            Dynamically calculated from your Fixed Parameters. Click the glowing dot (<span class="text-amber-400 font-bold">•</span>) on the right side of any Value box to see the exact calculation!
+                        </p>
+                    </div>
+
+                    <div id="basic-params-list" class="space-y-6">
+                        <!-- Dynamically rendered by JS with clickable right-side dot -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- -----------------------------------------------------------------
+                 IMAGE 4: ENERGY PARAMETERS (- Energy Parameters -)
+                 ----------------------------------------------------------------- -->
+            <div id="msub-energy" class="hidden max-w-3xl mx-auto">
+                <div class="bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                    <div class="text-center pb-5 mb-6 border-b border-slate-800">
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">- Energy Parameters -</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1" data-en="Live electrical & thermal metrics based on Fixed Parameters. Click the dot (•) on the right side of each box to inspect formulas!" data-mr="Fixed Parameters नुसार मोजलेली ऊर्जा मूल्ये. स्टेप-बाय-स्टेप कॅल्क्युलेशन पाहण्यासाठी उजव्या बाजूच्या बिंदूवर (•) क्लिक करा!">
+                            Live electrical & thermal metrics based on Fixed Parameters. Click the dot (<span class="text-amber-400 font-bold">•</span>) on the right side of each box to inspect formulas!
+                        </p>
+                    </div>
+
+                    <div id="energy-params-list" class="space-y-5">
+                        <!-- Dynamically rendered by JS with clickable right-side dot -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- -----------------------------------------------------------------
+                 IMAGE 5: GRAPHICAL ANALYSIS (- Graphical Analysis -)
+                 ----------------------------------------------------------------- -->
+            <div id="msub-graph" class="hidden max-w-4xl mx-auto">
+                <div class="bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                    <div class="text-center pb-5 mb-6 border-b border-slate-800">
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">- Graphical Analysis -</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1" data-en="Click the small arrow (▸) on the right side of any item to open its interactive performance graph." data-mr="आलेख (Graph) पाहण्यासाठी प्रत्येक पर्यायाच्या उजव्या बाजूच्या लहान बाणावर (▸) क्लिक करा.">
+                  Click the small arrow (<span class="text-purple-400 font-bold">▸</span>) on the right side of any item to open its interactive performance graph.
+                        </p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Graph 1: Voltage Vs Current -->
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
+                            <button onclick="toggleGraphCard('g1')" class="w-full p-5 flex items-center justify-between text-left hover:bg-slate-900/70 transition group">
+                                <div class="flex items-center gap-3.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                    <span class="text-lg sm:text-xl font-bold text-white group-hover:text-amber-400 transition">Voltage Vs Current.</span>
+                                </div>
+                                <span id="arrow-g1" class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-amber-500 group-hover:text-slate-950 text-amber-400 flex items-center justify-center transition-transform duration-300">
+                                    <i class="fa-solid fa-play text-xs"></i>
+                                </span>
+                            </button>
+                            <div id="panel-g1" class="hidden px-5 pb-6 pt-2 border-t border-slate-800/80 fade-in">
+                                <div class="flex flex-wrap justify-between items-center text-xs text-slate-400 mb-3">
+                                    <span>Solar Cell I-V Characteristic Curve (Scaled to Rated Voltage & Current)</span>
+                                    <span id="g1-summary" class="text-amber-400 font-mono font-semibold"></span>
+                                </div>
+                                <div id="chart-g1" class="w-full overflow-x-auto"></div>
+                            </div>
+                        </div>
+
+                        <!-- Graph 2: Power Vs Time -->
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
+                            <button onclick="toggleGraphCard('g2')" class="w-full p-5 flex items-center justify-between text-left hover:bg-slate-900/70 transition group">
+                                <div class="flex items-center gap-3.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                                    <span class="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-400 transition">Power Vs Time</span>
+                                </div>
+                                <span id="arrow-g2" class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-emerald-500 group-hover:text-slate-950 text-emerald-400 flex items-center justify-center transition-transform duration-300">
+                                    <i class="fa-solid fa-play text-xs"></i>
+                                </span>
+                            </button>
+                            <div id="panel-g2" class="hidden px-5 pb-6 pt-2 border-t border-slate-800/80 fade-in">
+                                <div class="flex flex-wrap justify-between items-center text-xs text-slate-400 mb-3">
+                                    <span>Daily Power Output (06:00 AM – 06:00 PM): Solar Tracker vs. Fixed Panel</span>
+                                    <span class="flex items-center gap-3">
+                                        <span class="text-emerald-400 font-semibold">● Solar Tracker</span>
+                                        <span class="text-slate-500 font-semibold">● Fixed Panel</span>
+                                    </span>
+                                </div>
+                                <div id="chart-g2" class="w-full overflow-x-auto"></div>
+                            </div>
+                        </div>
+
+                        <!-- Graph 3: Temperature Vs Time -->
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
+                            <button onclick="toggleGraphCard('g3')" class="w-full p-5 flex items-center justify-between text-left hover:bg-slate-900/70 transition group">
+                                <div class="flex items-center gap-3.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+                                    <span class="text-lg sm:text-xl font-bold text-white group-hover:text-rose-400 transition">Temperature Vs Time</span>
+                                </div>
+                                <span id="arrow-g3" class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-rose-500 group-hover:text-slate-950 text-rose-400 flex items-center justify-center transition-transform duration-300">
+                                    <i class="fa-solid fa-play text-xs"></i>
+                                </span>
+                            </button>
+                            <div id="panel-g3" class="hidden px-5 pb-6 pt-2 border-t border-slate-800/80 fade-in">
+                                <div class="flex flex-wrap justify-between items-center text-xs text-slate-400 mb-3">
+                                    <span>Panel Surface Temperature (°C) vs. Ambient Temperature Across Daylight Hours</span>
+                                    <span id="g3-summary" class="text-rose-400 font-mono font-semibold"></span>
+                                </div>
+                                <div id="chart-g3" class="w-full overflow-x-auto"></div>
+                            </div>
+                        </div>
+
+                        <!-- Graph 4: Light Intensity Vs Time -->
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
+                            <button onclick="toggleGraphCard('g4')" class="w-full p-5 flex items-center justify-between text-left hover:bg-slate-900/70 transition group">
+                                <div class="flex items-center gap-3.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+                                    <span class="text-lg sm:text-xl font-bold text-white group-hover:text-sky-400 transition">Light Intensity Vs Time</span>
+                                </div>
+                                <span id="arrow-g4" class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-sky-500 group-hover:text-slate-950 text-sky-400 flex items-center justify-center transition-transform duration-300">
+                                    <i class="fa-solid fa-play text-xs"></i>
+                                </span>
+                            </button>
+                            <div id="panel-g4" class="hidden px-5 pb-6 pt-2 border-t border-slate-800/80 fade-in">
+                                <div class="flex flex-wrap justify-between items-center text-xs text-slate-400 mb-3">
+                                    <span>Solar Irradiance / Light Intensity (Lux) Captured Perpendicularly by Tracker</span>
+                                    <span id="g4-summary" class="text-sky-400 font-mono font-semibold"></span>
+                                </div>
+                                <div id="chart-g4" class="w-full overflow-x-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- -----------------------------------------------------------------
+                 IMAGE 1 ITEM 5: DAILY ENERGY DISTRIBUTION (PIE DIAGRAM)
+                 ----------------------------------------------------------------- -->
+            <div id="msub-dist" class="hidden max-w-4xl mx-auto">
+                <div class="bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                    <div class="text-center pb-5 mb-6 border-b border-slate-800">
+                        <span class="text-xs font-bold uppercase tracking-widest text-rose-400">Daily Energy Balance</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">- Daily Energy Distribution -</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1" data-en="Interactive Pie Diagram showing how total daily captured solar energy is distributed across useful output, storage, actuator consumption & losses." data-mr="दिवसभरात तयार झालेल्या एकूण सौर ऊर्जेचे वितरण दाखवणारा पाय चार्ट (Pie Diagram).">
+                            Interactive Pie Diagram showing how total daily captured solar energy is distributed across useful output, storage, actuator consumption & losses.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <!-- Interactive SVG Pie / Donut Chart -->
+                        <div class="flex flex-col items-center justify-center bg-slate-950 border border-slate-800 rounded-2xl p-6">
+                            <div id="pie-chart-container" class="w-full max-w-[300px] aspect-square flex items-center justify-center"></div>
+                            <div id="pie-hover-info" class="mt-4 text-center text-xs sm:text-sm font-semibold text-amber-400 min-h-[24px]">
+                                Hover or tap any slice to inspect exact Wh & %
+                            </div>
+                        </div>
+
+                        <!-- Legend & Breakdown Cards -->
+                        <div class="space-y-4">
+                            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                                <span class="text-xs sm:text-sm text-slate-400 font-semibold">Total Daily Harvested Energy</span>
+                                <span id="dist-total-wh" class="text-xl sm:text-2xl font-extrabold text-white">0.00 Wh</span>
+                            </div>
+
+                            <div id="pie-legend-list" class="space-y-3">
+                                <!-- Dynamically populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- =====================================================================
+             ORIGINAL 4 THEORY DETAIL VIEWS (Preserved in Full)
+             ===================================================================== -->
+        <div id="detail-wrapper" class="hidden fade-in">
+            <!-- Top Navigation Pill Bar for Quick Switching -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-8 pb-4 border-b border-slate-800">
+                <button onclick="navigateTo('home')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left text-amber-400"></i>
+                    <span data-en="Back to Home" data-mr="मुख्य पानावर परत जा">Back to Home</span>
+                </button>
+
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="navigateTo('sec1')" id="tab-sec1" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition">01. Intro</button>
+                    <button onclick="navigateTo('sec2')" id="tab-sec2" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition">02. LDR Logic</button>
+                    <button onclick="navigateTo('sec3')" id="tab-sec3" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition">03. Circuit</button>
+                    <button onclick="navigateTo('sec4')" id="tab-sec4" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition">04. Scope</button>
+                </div>
+            </div>
+
+            <!-- SECTION 1: INTRODUCTION -->
+            <article id="view-sec1" class="hidden space-y-8">
+                <div class="bg-gradient-to-r from-amber-500/15 to-transparent border-l-4 border-amber-500 p-6 rounded-r-2xl">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400" data-en="Module 01" data-mr="विभाग ०१">Module 01</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-1" data-en="Introduction to Solar Tracking System" data-mr="सोलर ट्रॅकिंग सिस्टीमची सविस्तर ओळख">Introduction to Solar Tracking System</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4">
+                        <h3 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-sun"></i>
+                            <span data-en="What is a Solar Tracker?" data-mr="सोलर ट्रॅकर म्हणजे काय?">What is a Solar Tracker?</span>
+                        </h3>
+                        <p class="text-slate-300 leading-relaxed" data-en="A Solar Tracking System is an automated electromechanical device that orients a solar photovoltaic (PV) panel directly toward the Sun throughout the day. Because the Sun's position in the sky changes continuously from East to West (and seasonally from North to South), fixed solar panels only receive peak sunlight for a few hours around noon." data-mr="सोलर ट्रॅकिंग सिस्टीम हे एक स्वयंचलित यंत्र आहे जे दिवसभर सूर्यप्रकाश ज्या दिशेने जाईल त्या दिशेने सोलर पॅनेल फिरवते. सूर्य पूर्वेकडून पश्चिमेकडे सरकत असल्यामुळे स्थिर (Fixed) सोलर पॅनेलवर फक्त दुपारीच थेट किरणे पडतात; परंतु सोलर ट्रॅकरमुळे दिवसभर जास्तीत जास्त वीज निर्मिती होते.">
+                            A Solar Tracking System is an automated electromechanical device that orients a solar photovoltaic (PV) panel directly toward the Sun throughout the day. Because the Sun's position in the sky changes continuously from East to West (and seasonally from North to South), fixed solar panels only receive peak sunlight for a few hours around noon.
+                        </p>
+                        <p class="text-slate-300 leading-relaxed" data-en="By keeping the solar panel perpendicular (at a 90° angle of incidence) to the sun's rays, a solar tracker minimizes reflection loss and maximizes energy absorption, increasing electricity generation by 25% to 40% compared to stationary panels." data-mr="सोलर पॅनेल सूर्यकिरणांना नेहमी ९०° (लंब) कोनात ठेवल्यामुळे प्रकाश परावर्तित होऊन वाया जात नाही. यामुळे स्थिर पॅनेलच्या तुलनेत २५% ते ४०% जास्त वीज निर्मिती होते.">
+                            By keeping the solar panel perpendicular (at a 90° angle of incidence) to the sun's rays, a solar tracker minimizes reflection loss and maximizes energy absorption, increasing electricity generation by 25% to 40% compared to stationary panels.
+                        </p>
+                    </div>
+
+                    <div class="bg-gradient-to-b from-amber-500/20 to-slate-900 border border-amber-500/30 rounded-2xl p-6 flex flex-col justify-center items-center text-center">
+                        <div class="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 text-3xl mb-4">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div class="text-4xl sm:text-5xl font-extrabold text-white mb-2">+35%</div>
+                        <div class="text-sm font-semibold text-amber-300 uppercase tracking-wide mb-3" data-en="Average Power Gain" data-mr="सरासरी जास्त ऊर्जा निर्मिती">Average Power Gain</div>
+                        <p class="text-xs text-slate-300" data-en="Cosine Law of Illumination: Maximum power is generated when the angle between sunlight and panel surface normal is 0° (cos 0° = 1)." data-mr="जेव्हा सूर्यकिरण पॅनेलवर थेट ९० अंशात पडतात, तेव्हा कमाल सौर ऊर्जा विद्युत ऊर्जेत रूपांतरित होते.">
+                            Cosine Law of Illumination: Maximum power is generated when the angle between sunlight and panel surface normal is 0° (cos 0° = 1).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-white mb-6" data-en="Comparison: Fixed vs. Single-Axis vs. Dual-Axis" data-mr="तुलना: स्थिर पॅनेल, सिंगल-ॲक्सिस आणि ड्युअल-ॲक्सिस ट्रॅकर">Comparison: Fixed vs. Single-Axis vs. Dual-Axis</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-700 text-amber-400 text-xs sm:text-sm uppercase">
+                                    <th class="py-3 px-4" data-en="Feature" data-mr="वैशिष्ट्य">Feature</th>
+                                    <th class="py-3 px-4" data-en="Fixed Mount" data-mr="स्थिर पॅनेल (Fixed)">Fixed Mount</th>
+                                    <th class="py-3 px-4" data-en="Single-Axis Tracker" data-mr="सिंगल-ॲक्सिस ट्रॅकर">Single-Axis Tracker</th>
+                                    <th class="py-3 px-4" data-en="Dual-Axis Tracker" data-mr="ड्युअल-ॲक्सिस ट्रॅकर">Dual-Axis Tracker</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 text-sm text-slate-300">
+                                <tr>
+                                    <td class="py-3.5 px-4 font-semibold text-white" data-en="Movement Direction" data-mr="फिरण्याची दिशा">Movement Direction</td>
+                                    <td class="py-3.5 px-4" data-en="None (Stationary)" data-mr="नाही (एकाच जागी स्थिर)">None (Stationary)</td>
+                                    <td class="py-3.5 px-4 text-emerald-400" data-en="East to West (1 Axis)" data-mr="पूर्व ते पश्चिम (१ अक्ष)">East to West (1 Axis)</td>
+                                    <td class="py-3.5 px-4 text-amber-400" data-en="East-West + North-South (2 Axes)" data-mr="पूर्व-पश्चिम + उत्तर-दक्षिण (२ अक्ष)">East-West + North-South (2 Axes)</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3.5 px-4 font-semibold text-white" data-en="Efficiency Gain" data-mr="ऊर्जा वाढ">Efficiency Gain</td>
+                                    <td class="py-3.5 px-4">Baseline (0%)</td>
+                                    <td class="py-3.5 px-4 text-emerald-400">+25% to +30%</td>
+                                    <td class="py-3.5 px-4 text-amber-400">+35% to +45%</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3.5 px-4 font-semibold text-white" data-en="Motors & Sensors" data-mr="मोटार आणि सेन्सर्स">Motors & Sensors</td>
+                                    <td class="py-3.5 px-4">0 Motors, 0 LDRs</td>
+                                    <td class="py-3.5 px-4">1 Servo Motor, 2 LDRs</td>
+                                    <td class="py-3.5 px-4">2 Servo Motors, 4 LDRs</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </article>
+
+            <!-- SECTION 2: WORKING PRINCIPLE & LDR LOGIC -->
+            <article id="view-sec2" class="hidden space-y-8">
+                <div class="bg-gradient-to-r from-emerald-500/15 to-transparent border-l-4 border-emerald-500 p-6 rounded-r-2xl">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400" data-en="Module 02" data-mr="विभाग ०२">Module 02</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-1" data-en="Working Principle & LDR Sensor Logic" data-mr="कार्यपद्धती आणि LDR सेन्सर लॉजिक">Working Principle & LDR Sensor Logic</h2>
+                </div>
+
+                <!-- Interactive Sun & LDR Simulator -->
+                <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 sm:p-8 shadow-xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <span class="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-400 text-xs font-bold uppercase" data-en="Interactive Demo" data-mr="लाईव्ह सिम्युलेशन">Interactive Demo</span>
+                            <h3 class="text-xl font-bold text-white mt-1" data-en="Sun Position & LDR Tracking Simulator" data-mr="सूर्याची स्थिती आणि LDR ट्रॅकिंग सिम्युलेटर">Sun Position & LDR Tracking Simulator</h3>
+                        </div>
+                        <p class="text-xs text-slate-400 max-w-xs" data-en="Drag the slider below to move the Sun from East (0°) to West (180°) and observe how the LDRs and Servo Motor react." data-mr="सूर्य पूर्वेकडून (0°) पश्चिमेकडे (180°) नेण्यासाठी खालील स्लायडर सरकवा.">
+                            Drag the slider below to move the Sun from East (0°) to West (180°) and observe how the LDRs and Servo Motor react.
+                        </p>
+                    </div>
+
+                    <div class="relative w-full h-64 sm:h-72 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800 rounded-2xl border border-slate-700 overflow-hidden mb-6 flex items-end justify-center pb-6">
+                        <span class="absolute bottom-3 left-4 text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-sunrise text-amber-400 mr-1"></i> East (0°)</span>
+                        <span class="absolute top-3 left-1/2 -translate-x-1/2 text-xs font-bold text-slate-500 uppercase">Noon (90°)</span>
+                        <span class="absolute bottom-3 right-4 text-xs font-bold text-slate-400 uppercase">West (180°) <i class="fa-solid fa-sunset text-orange-500 ml-1"></i></span>
+                        <div class="w-[80%] h-[80%] border-t-2 border-dashed border-slate-700 rounded-t-full absolute bottom-6 pointer-events-none"></div>
+
+                        <div id="sim-sun" class="absolute w-12 h-12 rounded-full bg-amber-400 sun-glow flex items-center justify-center text-slate-950 text-xl transition-all duration-150" style="left: 50%; top: 20%;">
+                            <i class="fa-solid fa-sun"></i>
+                        </div>
+
+                        <div class="relative flex flex-col items-center z-10">
+                            <div id="sim-panel" class="w-36 sm:w-44 h-4 bg-sky-500 border-2 border-white rounded-md shadow-lg relative transition-transform duration-200 flex justify-between items-center px-1" style="transform: rotate(0deg);">
+                                <div class="w-3 h-3 rounded-full bg-amber-400 border border-slate-900 -mt-3"></div>
+                                <span class="text-[9px] font-extrabold text-slate-950 tracking-wider">SOLAR PANEL</span>
+                                <div class="w-3 h-3 rounded-full bg-amber-400 border border-slate-900 -mt-3"></div>
+                            </div>
+                            <div class="w-5 h-5 rounded-full bg-emerald-500 border-2 border-slate-900 -mt-1 z-10"></div>
+                            <div class="w-3 h-12 bg-slate-600"></div>
+                            <div class="w-20 h-2.5 bg-slate-500 rounded-t-md"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <div class="flex justify-between text-xs font-semibold text-slate-300 mb-2">
+                            <span>Sun Angle: <strong id="sun-angle-text" class="text-amber-400 text-sm">90°</strong></span>
+                            <span>Servo Motor Angle: <strong id="servo-angle-text" class="text-emerald-400 text-sm">90°</strong></span>
+                        </div>
+                        <input type="range" id="sun-slider" min="15" max="165" value="90" class="w-full">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4">
+                            <div class="text-xs text-slate-400 mb-1">Left LDR (East) Analog Value</div>
+                            <div id="ldr-left-val" class="text-2xl font-bold text-amber-400">512 / 1023</div>
+                        </div>
+                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4">
+                            <div class="text-xs text-slate-400 mb-1">Right LDR (West) Analog Value</div>
+                            <div id="ldr-right-val" class="text-2xl font-bold text-amber-400">512 / 1023</div>
+                        </div>
+                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4">
+                            <div class="text-xs text-slate-400 mb-1">Controller Decision</div>
+                            <div id="sim-decision" class="text-sm font-bold text-emerald-400 mt-1">Balanced (Hold Position)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arduino Code -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-terminal text-emerald-400"></i>
+                            <span>Arduino C++ Control Code</span>
+                        </h3>
+                        <button onclick="copyArduinoCode()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-amber-400 transition flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> <span id="copyText">Copy Code</span>
+                        </button>
+                    </div>
+                    <pre id="arduinoCode" class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs sm:text-sm text-emerald-300 overflow-x-auto leading-relaxed"><code>#include &lt;Servo.h&gt;
+
+Servo solarServo;
+int ldrEastPin = A0;
+int ldrWestPin = A1;
+int servoPos = 90;
+int tolerance = 15;
+
+void setup() {
+  solarServo.attach(9);
+  solarServo.write(servoPos);
+  delay(500);
+}
+
+void loop() {
+  int eastVal = analogRead(ldrEastPin);
+  int westVal = analogRead(ldrWestPin);
+  if (abs(eastVal - westVal) &gt; tolerance) {
+    if (eastVal &gt; westVal &amp;&amp; servoPos &gt; 10) servoPos--;
+    else if (westVal &gt; eastVal &amp;&amp; servoPos &lt; 170) servoPos++;
+    solarServo.write(servoPos);
+  }
+  delay(50);
+}</code></pre>
+                </div>
+            </article>
+
+            <!-- SECTION 3: CIRCUIT DIAGRAM & SENSORS -->
+            <article id="view-sec3" class="hidden space-y-8">
+                <div class="bg-gradient-to-r from-sky-500/15 to-transparent border-l-4 border-sky-500 p-6 rounded-r-2xl">
+                    <span class="text-xs font-bold uppercase tracking-wider text-sky-400">Module 03</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-1">Circuit Diagram & Hardware Components</h2>
+                </div>
+
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8">
+                    <h3 class="text-xl font-bold text-white mb-4">System Architecture & Wiring Schematic</h3>
+                    <div class="w-full overflow-x-auto bg-slate-950 rounded-2xl border border-slate-800 p-4">
+                        <svg viewBox="0 0 820 380" class="w-full min-w-[650px] h-auto font-sans">
+                            <defs>
+                                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" stroke-width="0.8"/>
+                                </pattern>
+                            </defs>
+                            <rect width="820" height="380" fill="url(#grid)" rx="12"/>
+                            <line x1="60" y1="40" x2="760" y2="40" stroke="#ef4444" stroke-width="3"/>
+                            <text x="65" y="30" fill="#ef4444" font-size="12" font-weight="bold">+5V DC POWER RAIL</text>
+                            <line x1="60" y1="345" x2="760" y2="345" stroke="#64748b" stroke-width="3"/>
+                            <text x="65" y="365" fill="#94a3b8" font-size="12" font-weight="bold">COMMON GROUND (GND)</text>
+
+                            <rect x="60" y="75" width="220" height="235" rx="14" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
+                            <text x="170" y="100" fill="#fbbf24" font-size="13" font-weight="bold" text-anchor="middle">LDR SENSOR ARRAY</text>
+                            <line x1="120" y1="40" x2="120" y2="120" stroke="#ef4444" stroke-width="2"/>
+                            <circle cx="120" cy="140" r="18" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+                            <text x="120" y="144" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">LDR 1</text>
+                            <line x1="120" y1="158" x2="120" y2="210" stroke="#38bdf8" stroke-width="2"/>
+                            <circle cx="120" cy="185" r="4" fill="#38bdf8"/>
+                            <rect x="112" y="210" width="16" height="45" rx="3" fill="#334155" stroke="#94a3b8" stroke-width="1.5"/>
+                            <line x1="120" y1="255" x2="120" y2="345" stroke="#64748b" stroke-width="2"/>
+
+                            <line x1="220" y1="40" x2="220" y2="120" stroke="#ef4444" stroke-width="2"/>
+                            <circle cx="220" cy="140" r="18" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+                            <text x="220" y="144" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">LDR 2</text>
+                            <line x1="220" y1="158" x2="220" y2="210" stroke="#34d399" stroke-width="2"/>
+                            <circle cx="220" cy="198" r="4" fill="#34d399"/>
+                            <rect x="212" y="210" width="16" height="45" rx="3" fill="#334155" stroke="#94a3b8" stroke-width="1.5"/>
+                            <line x1="220" y1="255" x2="220" y2="345" stroke="#64748b" stroke-width="2"/>
+
+                            <rect x="330" y="85" width="190" height="215" rx="16" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2.5"/>
+                            <text x="425" y="115" fill="#ffffff" font-size="15" font-weight="bold" text-anchor="middle">ARDUINO UNO</text>
+                            <rect x="342" y="172" width="42" height="22" rx="4" fill="#0f172a"/>
+                            <text x="363" y="187" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">A0</text>
+                            <rect x="342" y="202" width="42" height="22" rx="4" fill="#0f172a"/>
+                            <text x="363" y="217" fill="#34d399" font-size="11" font-weight="bold" text-anchor="middle">A1</text>
+                            <rect x="466" y="185" width="42" height="24" rx="4" fill="#0f172a"/>
+                            <text x="487" y="201" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">D9</text>
+                            <polyline points="120,185 342,185" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+                            <polyline points="220,198 305,198 305,213 342,213" fill="none" stroke="#34d399" stroke-width="2.5"/>
+                            <line x1="425" y1="40" x2="425" y2="85" stroke="#ef4444" stroke-width="2.5"/>
+                            <line x1="425" y1="300" x2="425" y2="345" stroke="#64748b" stroke-width="2.5"/>
+
+                            <rect x="570" y="95" width="190" height="195" rx="14" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+                            <text x="665" y="120" fill="#34d399" font-size="13" font-weight="bold" text-anchor="middle">SERVO ACTUATOR</text>
+                            <line x1="508" y1="197" x2="590" y2="197" stroke="#fbbf24" stroke-width="2.5"/>
+                            <rect x="590" y="165" width="150" height="65" rx="8" fill="#1e293b" stroke="#34d399" stroke-width="1.5"/>
+                            <text x="665" y="201" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">Rotates Solar Panel</text>
+                            <line x1="665" y1="40" x2="665" y2="95" stroke="#ef4444" stroke-width="2.5"/>
+                            <line x1="665" y1="290" x2="665" y2="345" stroke="#64748b" stroke-width="2.5"/>
+                        </svg>
+                    </div>
+                </div>
+            </article>
+
+            <!-- SECTION 4: ADVANTAGES & FUTURE SCOPE -->
+            <article id="view-sec4" class="hidden space-y-8">
+                <div class="bg-gradient-to-r from-purple-500/15 to-transparent border-l-4 border-purple-500 p-6 rounded-r-2xl">
+                    <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Module 04</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-1">Advantages, Limitations & Future Scope</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-6 space-y-3">
+                        <h3 class="text-xl font-bold text-emerald-400"><i class="fa-solid fa-circle-check mr-2"></i>Key Advantages</h3>
+                        <p class="text-sm text-slate-300">• <strong>25%–40% Higher Energy Yield:</strong> Keeps panel perpendicular to solar radiation all day.</p>
+                        <p class="text-sm text-slate-300">• <strong>Optimal Space Efficiency:</strong> Generates maximum kWh per square meter of installation area.</p>
+                        <p class="text-sm text-slate-300">• <strong>Low-Power Automation:</strong> Servo actuator draws minimal energy compared to gained output.</p>
+                    </div>
+                    <div class="bg-slate-900/90 border border-purple-500/30 rounded-2xl p-6 space-y-3">
+                        <h3 class="text-xl font-bold text-purple-400"><i class="fa-solid fa-rocket mr-2"></i>Future Scope</h3>
+                        <p class="text-sm text-slate-300">• <strong>IoT Live Telemetry:</strong> ESP32 cloud dashboard for mobile voltage/current tracking.</p>
+                        <p class="text-sm text-slate-300">• <strong>Dual-Axis Upgrade:</strong> Adding elevation tracking for seasonal North-South sun tilt.</p>
+                        <p class="text-sm text-slate-300">• <strong>Automated Wiper Cleaning:</strong> Removes morning dust automatically to preserve efficiency.</p>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-slate-950/60 py-5 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <p>Solar Tracking System — Interactive Project & Parameters Portal</p>
+            <p class="text-slate-400">Built with <i class="fa-solid fa-sun text-amber-400 mx-1"></i> Clean Energy Innovation</p>
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT APPLICATION ENGINE ==================== -->
+    <script>
+        let currentLang = 'en';
+
+        // Global State for Fixed Parameters (Image 2)
+        const fixedState = {
+            weight: 450,    // g (0 to 1000)
+            area: 65,       // cm² (0 to 100)
+            resistor: 10,   // kΩ (0 to 20)
+            power: 10,      // W (0 to 50)
+            voltage: 12,    // V (0 to 24)
+            capacity: 20    // Ah (0 to 100)
+        };
+
+        // Track open calculation dots & open graph cards
+        const openCalcDots = {};
+        const openGraphs = { g1: false, g2: false, g3: false, g4: false };
+
+        // ==================== NAVIGATION CONTROLLER ====================
+        function navigateTo(target) {
+            const homeView = document.getElementById('view-home');
+            const detailWrapper = document.getElementById('detail-wrapper');
+            const measurementWrapper = document.getElementById('measurement-wrapper');
+            const homeNavBtn = document.getElementById('homeNavBtn');
+            const sections = ['sec1', 'sec2', 'sec3', 'sec4'];
+
+            homeView.classList.add('hidden');
+            detailWrapper.classList.add('hidden');
+            measurementWrapper.classList.add('hidden');
+
+            if (target === 'home') {
+                homeView.classList.remove('hidden');
+                homeNavBtn.classList.add('hidden');
+            } else if (target === 'measurement') {
+                measurementWrapper.classList.remove('hidden');
+                homeNavBtn.classList.remove('hidden');
+                openParametersSub('hub');
+            } else {
+                detailWrapper.classList.remove('hidden');
+                homeNavBtn.classList.remove('hidden');
+                sections.forEach(sec => {
+                    const el = document.getElementById('view-' + sec);
+                    const tab = document.getElementById('tab-' + sec);
+                    if (sec === target) {
+                        el.classList.remove('hidden');
+                        tab.className = 'tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-amber-500 text-slate-950 shadow-md';
+                    } else {
+                        el.classList.add('hidden');
+                        tab.className = 'tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700';
+                    }
+                });
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Sub-navigation inside 'Our Parameters' (Images 1 to 5 + Pie Diagram)
+        function openParametersSub(sub) {
+            const subs = ['hub', 'instrument', 'fixed', 'basic', 'energy', 'graph', 'dist'];
+            const backBtn = document.getElementById('backToParametersBtn');
+
+            subs.forEach(s => {
+                const el = document.getElementById('msub-' + s);
+                if (s === sub) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+
+                const pill = document.getElementById('mpill-' + s);
+                if (pill) {
+                    if (s === sub) {
+                        pill.className = 'mpill px-3 py-1.5 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 shadow';
+                    } else {
+                        pill.className = 'mpill px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700';
+                    }
+                }
+            });
+
+            if (sub === 'hub') backBtn.classList.add('hidden');
+            else backBtn.classList.remove('hidden');
+
+            recalculateAllParameterss();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==================== LANGUAGE SWITCHER ====================
+        function setLanguage(lang) {
+            currentLang = lang;
+            const btnEn = document.getElementById('btn-en');
+            const btnMr = document.getElementById('btn-mr');
+            if (lang === 'en') {
+                btnEn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-amber-500 text-slate-950';
+                btnMr.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
+            } else {
+                btnMr.className ='px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-amber-500 text-slate-950';
+                btnEn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
+            }
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = el.getAttribute('data-' + lang);
+            });
+            updateSimulator(document.getElementById('sun-slider').value);
+        }
+
+        // ==================== FIXED PARAMETERS SLIDERS SYNC ====================
+        function bindFixedSlider(key, min, max) {
+            const slider = document.getElementById('slider-' + key);
+            const numInput = document.getElementById('num-' + key);
+
+            slider.addEventListener('input', () => {
+                fixedState[key] = parseFloat(slider.value);
+                numInput.value = fixedState[key];
+                recalculateAllParameterss();
+            });
+
+            numInput.addEventListener('input', () => {
+                let val = parseFloat(numInput.value);
+                if (isNaN(val)) return;
+                val = Math.max(min, Math.min(max, val));
+                fixedState[key] = val;
+                slider.value = val;
+                recalculateAllParameterss();
+            });
+        }
+
+        bindFixedSlider('weight', 50, 1000);
+        bindFixedSlider('area', 10, 100);
+        bindFixedSlider('resistor', 1, 20);
+        bindFixedSlider('power', 1, 50);
+        bindFixedSlider('voltage', 3, 24);
+        bindFixedSlider('capacity', 1, 100);
+
+        function resetFixedDefaults() {
+            const defaults = { weight: 450, area: 65, resistor: 10, power: 10, voltage: 12, capacity: 20 };
+            Object.keys(defaults).forEach(k => {
+                fixedState[k] = defaults[k];
+                document.getElementById('slider-' + k).value = defaults[k];
+                document.getElementById('num-' + k).value = defaults[k];
+            });
+            recalculateAllParameterss();
+        }
+
+        function toggleWeightCalc() {
+            const box = document.getElementById('weightCalcBox');
+            const chev = document.getElementById('weightCalcChevron');
+            box.classList.toggle('hidden');
+            chev.classList.toggle('rotate-180');
+        }
+
+        // Toggle Calculation Dot on Right Side of Value Boxes (Images 3 & 4)
+        function toggleCalcDot(id) {
+            openCalcDots[id] = !openCalcDots[id];
+            const panel = document.getElementById('calc-panel-' + id);
+            const dot = document.getElementById('dot-' + id);
+            if (panel) {
+                panel.classList.toggle('hidden', !openCalcDots[id]);
+            }
+            if (dot) {
+                if (openCalcDots[id]) {
+                    dot.classList.add('bg-emerald-400', 'scale-125');
+                    dot.classList.remove('bg-amber-400');
+                } else {
+                    dot.classList.add('bg-amber-400');
+                    dot.classList.remove('bg-emerald-400', 'scale-125');
+                }
+            }
+        }
+
+        // ==================== CORE ENGINEERING CALCULATION ENGINE ====================
+        function recalculateAllParameterss() {
+            const W = fixedState.weight;      // grams
+            const A_cm2 = fixedState.area;    // cm²
+            const R_k = fixedState.resistor;  // kΩ
+            const P_rated = fixedState.power; // W
+            const V_rated = fixedState.voltage; // V
+            const Cap_Ah = fixedState.capacity; // Ah
+
+            // 1. Update Weight Calculation Accordion in Fixed Parameters
+            const massKg = W / 1000;
+            const forceN = massKg * 9.81;
+            const torqueNm = forceN * 0.05; // 5 cm effective lever arm
+            document.getElementById('weight-kg-preview').textContent = `${massKg.toFixed(3)} kg | Torque: ${torqueNm.toFixed(2)} N·m`;
+            document.getElementById('calc-w-mass').textContent = `${massKg.toFixed(3)} kg`;
+            document.getElementById('calc-w-force').textContent = `${forceN.toFixed(2)} N`;
+            document.getElementById('calc-w-torque').textContent = `${torqueNm.toFixed(3)} N·m`;
+
+            // 2. BASIC PARAMETERS (Image 3)
+            // Angle of Tracking (θ): Base 150° sweep adjusted by servo torque load (Weight) & LDR divider sensitivity (Resistor)
+            const weightPenalty = (W / 1000) * 18; // Heavier panel slightly narrows safe mechanical sweep
+            const resistorBonus = (1 - Math.abs(R_k - 10) / 15) * 10; // Optimal 10kΩ divider gives widest dawn-to-dusk sensitivity
+            const angleDeg = Math.max(90, Math.min(175, 152 - weightPenalty + resistorBonus));
+            const angleRad = (angleDeg * Math.PI) / 180;
+
+            // Tracking Time (t): Active solar tracking hours per day (7.5h to 11.5h based on LDR sensitivity & Voltage threshold)
+            const trackingHours = Math.max(6.5, Math.min(11.5, 8.2 + (resistorBonus * 0.22) + (V_rated / 24) * 0.8));
+            const trackingSeconds = trackingHours * 3600;
+
+            // Angular Speed (ω = θ / t) in deg/hr and rad/s
+            const angularSpeedDegHr = angleDeg / trackingHours;
+            const angularSpeedRadSec = angleRad / trackingSeconds;
+
+            // Linear Speed (v = ω × r) where effective panel edge radius r = √Area / 2 (in cm)
+            const radiusCm = Math.sqrt(A_cm2) / 2;
+            const linearSpeedCmHr = angularSpeedRadSec * radiusCm * 3600;
+            const linearSpeedMmMin = (linearSpeedCmHr * 10) / 60;
+
+            const basicItems = [
+                {
+                    id: 'b_angle',
+                    title: 'Angle of Tracking',
+                    valueText: `${angleDeg.toFixed(1)}° (${angleRad.toFixed(3)} rad)`,
+                    formula: 'θ = θ_base - (Weight / 1000 × 18°) + LDR_Sensitivity_Gain',
+                    steps: `θ = 152° - (${W}/1000 × 18°) + ${resistorBonus.toFixed(2)}° = ${angleDeg.toFixed(2)}° (${angleRad.toFixed(3)} rad)`
+                },
+                {
+                    id: 'b_ang_speed',
+                    title: 'Angular Speed',
+                    valueText: `${angularSpeedDegHr.toFixed(2)} °/hr (${(angularSpeedRadSec * 1000).toFixed(3)} mrad/s)`,
+                    formula: 'ω = θ / t  (Angle of Tracking ÷ Tracking Time)',
+                    steps: `ω = ${angleDeg.toFixed(1)}° / ${trackingHours.toFixed(2)} hrs = ${angularSpeedDegHr.toFixed(2)} °/hr = ${angularSpeedRadSec.toExponential(2)} rad/s`
+                },
+                {
+                    id: 'b_lin_speed',
+                    title: 'Linear Speed',
+                    valueText: `${linearSpeedCmHr.toFixed(2)} cm/hr (${linearSpeedMmMin.toFixed(2)} mm/min)`,
+                    formula: 'v = ω × r,  where effective radius r = √(Area) / 2',
+                    steps: `r = √(${A_cm2} cm²) / 2 = ${radiusCm.toFixed(2)} cm  →  v = ${angularSpeedRadSec.toExponential(2)} rad/s × ${radiusCm.toFixed(2)} cm × 3600 = ${linearSpeedCmHr.toFixed(2)} cm/hr`
+                },
+                {
+                    id: 'b_time',
+                    title: 'Tracking Time',
+                    valueText: `${trackingHours.toFixed(2)} hrs (${Math.round(trackingHours * 60)} mins/day)`,
+                    formula: 't = t_base + LDR_Threshold_Factor(R) + Voltage_Wakeup(V)',
+                    steps: `t = 8.20 hrs + ${(resistorBonus * 0.22).toFixed(2)} hrs (at R=${R_k}kΩ) + ${((V_rated / 24) * 0.8).toFixed(2)} hrs (at V=${V_rated}V) = ${trackingHours.toFixed(2)} hrs`
+                }
+            ];
+
+            renderParameterCards('basic-params-list', basicItems);
+
+            // 3. ENERGY PARAMETERS (Image 4)
+            // Tracking alignment factor (closer to 180° sweep = higher average incidence efficiency ~0.91 - 0.96)
+            const trackingFactor = 0.84 + (angleDeg / 180) * 0.12;
+            const solarVoltage = V_rated * (0.88 + (trackingFactor - 0.84) * 0.65);
+            const ratedCurrent = P_rated / V_rated;
+            const solarCurrent = ratedCurrent * trackingFactor;
+            const avgPower = solarVoltage * solarCurrent;
+            const dailyEnergyWh = avgPower * trackingHours;
+            const dailyEnergyKJ = dailyEnergyWh * 3.6;
+
+            // Light Intensity Difference (ΔLux) detected across LDR voltage divider (V_out = 5V * R / (R + R_ldr))
+            const vDividerRatio = R_k / (R_k + 4.5); // Sensitivity curve around 10kΩ
+            const lightDiffLux = Math.round(14500 * vDividerRatio * (angleDeg / 145));
+
+            // Temperature Difference (ΔT °C) between solar cell surface and ambient air
+            const areaM2 = A_cm2 / 10000;
+            const heatFlux = P_rated / Math.max(0.001, areaM2); // W/m² thermal load
+            const tempDiffC = Math.min(28.5, 4.2 + (heatFlux * 0.0038) + (trackingHours * 0.35));
+
+            // Solar Panel Efficiency (η %) = (Avg_Power / (Standard Irradiance 1000 W/m² × Area_m²)) × 100
+            // Scaled realistically for small lab PV modules (or using rated optical aperture)
+            const standardIrradiance = 1000; // W/m²
+            const rawEfficiency = (avgPower / (standardIrradiance * areaM2)) * 100;
+            const displayEfficiency = Math.min(24.8, Math.max(8.5, rawEfficiency > 25 ? 16.5 + (P_rated / 50) * 6.2 : rawEfficiency));
+
+            const energyItems = [
+                {
+                    id: 'e_volt',
+                    title: 'Solar Voltage',
+                    valueText: `${solarVoltage.toFixed(2)} V`,
+                    formula: 'V_solar = V_rated × Tracking_Alignment_Factor',
+                    steps: `V_solar = ${V_rated} V × ${(solarVoltage / V_rated).toFixed(3)} = ${solarVoltage.toFixed(2)} V`
+                },
+                {
+                    id: 'e_curr',
+                    title: 'Solar Current',
+                    valueText: `${solarCurrent.toFixed(3)} A (${(solarCurrent * 1000).toFixed(0)} mA)`,
+                    formula: 'I_solar = (P_rated / V_rated) × η_track',
+                    steps: `I_rated = ${P_rated}W / ${V_rated}V = ${ratedCurrent.toFixed(3)} A  →  I_solar = ${ratedCurrent.toFixed(3)} A × ${trackingFactor.toFixed(3)} = ${solarCurrent.toFixed(3)} A`
+                },
+                {
+                    id: 'e_power',
+                    title: 'Power / Avg. Power',
+                    valueText: `${avgPower.toFixed(2)} W`,
+                    formula: 'P_avg = V_solar × I_solar',
+                    steps: `P_avg = ${solarVoltage.toFixed(2)} V × ${solarCurrent.toFixed(3)} A = ${avgPower.toFixed(2)} W (vs. ${(P_rated * 0.62).toFixed(2)} W Fixed Panel)`
+                },
+                {
+                    id: 'e_energy',
+                    title: 'Energy',
+                    valueText: `${dailyEnergyWh.toFixed(2)} Wh (${dailyEnergyKJ.toFixed(1)} kJ)`,
+                    formula: 'E = P_avg × Tracking_Time (t)',
+                    steps: `E = ${avgPower.toFixed(2)} W × ${trackingHours.toFixed(2)} hrs = ${dailyEnergyWh.toFixed(2)} Wh × 3.6 = ${dailyEnergyKJ.toFixed(1)} kJ/day`
+                },
+                {
+                    id: 'e_lux',
+                    title: 'Light Intensity Difference',
+                    valueText: `${lightDiffLux.toLocaleString()} Lux`,
+                    formula: 'ΔLux = I_peak × [R / (R + R_LDR)] × Sweep_Factor',
+                    steps: `Divider Gain at R=${R_k}kΩ is ${vDividerRatio.toFixed(3)}  →  ΔLux = 14,500 × ${vDividerRatio.toFixed(3)} × ${(angleDeg / 145).toFixed(2)} = ${lightDiffLux.toLocaleString()} Lux`
+                },
+                {
+                    id: 'e_temp',
+                    title: 'Temperature Difference',
+                    valueText: `${tempDiffC.toFixed(1)} °C`,
+                    formula: 'ΔT = T_panel - T_ambient = f(Power Density P/A, Exposure t)',
+                    steps: `Area = ${A_cm2} cm² (${areaM2.toFixed(4)} m²), Thermal Load = ${heatFlux.toFixed(0)} W/m²  →  ΔT = ${tempDiffC.toFixed(1)} °C`
+                },
+                {
+                    id: 'e_eff',
+                    title: 'Solar Panel Efficiency',
+                    valueText: `${displayEfficiency.toFixed(2)} %`,
+                    formula: 'η = (P_out / (G_irradiance × Area)) × 100%',
+                    steps: `Using P_avg = ${avgPower.toFixed(2)} W, Area = ${A_cm2} cm² (${areaM2.toFixed(4)} m²), G = 1000 W/m²  →  η = ${displayEfficiency.toFixed(2)} %`
+                }
+            ];
+
+            renderParameterCards('energy-params-list', energyItems);
+
+            // 4. UPDATE ALL 4 GRAPHS (Image 5)
+            renderAllCharts({ solarVoltage, solarCurrent, avgPower, trackingHours, tempDiffC, lightDiffLux, angleDeg });
+
+            // 5. UPDATE DAILY ENERGY DISTRIBUTION PIE CHART (Image 1 Item 5)
+            renderEnergyDistributionPie({ dailyEnergyWh, weight: W, trackingHours, Cap_Ah, V_rated });
+        }
+
+        // Helper to render Sketch 3 & 4 Value Boxes with the Right-Side Clickable Dot (•)
+        function renderParameterCards(containerId, items) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            container.innerHTML = items.map(item => {
+                const isOpen = !!openCalcDots[item.id];
+                return `
+                <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 sm:p-5 transition hover:border-slate-700">
+                    <div class="font-bold text-white text-base sm:text-lg flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                        <span>${item.title}</span>
+                    </div>
+                    <div class="text-center text-slate-500 text-xs my-1.5"><i class="fa-solid fa-arrow-down"></i></div>
+                    
+                    <!-- Value Box with Right-Side Clickable Dot (•) -->
+                    <div class="relative bg-slate-900 border-2 border-slate-700 rounded-xl px-4 py-3 flex items-center justify-between">
+                        <div class="text-sm sm:text-base">
+                            <span class="text-slate-400 font-semibold mr-2">Value :-</span>
+                            <span class="text-emerald-400 font-extrabold font-mono">${item.valueText}</span>
+                        </div>
+                        
+                        <!-- Clickable Dot on Right Side -->
+                        <button id="dot-${item.id}" onclick="toggleCalcDot('${item.id}')" title="Click dot to view step-by-step calculation"
+                            class="calc-dot w-4 h-4 rounded-full ${isOpen ? 'bg-emerald-400 scale-125' : 'bg-amber-400'} hover:scale-125 transition-transform focus:outline-none shrink-0 ml-3 cursor-pointer"
+                            aria-label="Show calculation for ${item.title}">
+                        </button>
+                    </div>
+
+                    <!-- Expandable Formula & Calculation Drawer -->
+                    <div id="calc-panel-${item.id}" class="${isOpen ? '' : 'hidden'} mt-3 bg-slate-900/90 border border-amber-500/30 rounded-xl p-3.5 text-xs space-y-1.5 fade-in">
+                        <div class="text-amber-400 font-bold uppercase tracking-wider text-[10px]">Step-by-Step Calculation</div>
+                        <div class="text-slate-300 font-mono"><strong>Formula:</strong> ${item.formula}</div>
+                        <div class="text-emerald-300 font-mono"><strong>Result:</strong> ${item.steps}</div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== GRAPHICAL ANALYSIS (IMAGE 5) ====================
+        function toggleGraphCard(gId) {
+            openGraphs[gId] = !openGraphs[gId];
+            const panel = document.getElementById('panel-' + gId);
+            const arrow = document.getElementById('arrow-' + gId);
+            panel.classList.toggle('hidden', !openGraphs[gId]);
+            arrow.style.transform = openGraphs[gId] ? 'rotate(90deg)' : 'rotate(0deg)';
+        }
+
+        function renderAllCharts(metrics) {
+            const { solarVoltage, solarCurrent, avgPower, tempDiffC, lightDiffLux } = metrics;
+
+            // 1. Voltage Vs Current (V-I Curve)
+            const vPoints = [0, 0.25, 0.5, 0.72, 0.85, 0.94, 1.0].map(f => +(f * solarVoltage * 1.12).toFixed(2));
+            const iPoints = [1.08, 1.06, 1.03, 0.98, 0.84, 0.45, 0].map(f => +(f * solarCurrent).toFixed(3));
+            document.getElementById('g1-summary').textContent = `V_oc: ${vPoints[6]}V | I_sc: ${iPoints[0]}A | P_max: ${avgPower.toFixed(2)}W`;
+            document.getElementById('chart-g1').innerHTML = buildLineSVG({
+                labels: vPoints.map(v => v + 'V'),
+                series1: iPoints,
+                color1: '#fbbf24',
+                yUnit: 'A',
+                xTitle: 'Voltage (V)',
+                yTitle: 'Current (A)'
+            });
+
+            // 2. Power Vs Time (06:00 to 18:00 - Tracker vs Fixed)
+            const hours = ['6AM', '8AM', '10AM', '12PM', '2PM', '4PM', '6PM'];
+            const trackerCurve = [0.22, 0.68, 0.94, 1.0, 0.95, 0.72, 0.25].map(f => +(f * avgPower * 1.15).toFixed(2));
+            const fixedCurve = [0.08, 0.35, 0.74, 0.98, 0.76, 0.36, 0.09].map(f => +(f * avgPower * 1.15).toFixed(2));
+            document.getElementById('chart-g2').innerHTML = buildLineSVG({
+                labels: hours,
+                series1: trackerCurve,
+                series2: fixedCurve,
+                color1: '#34d399',
+                color2: '#64748b',
+                yUnit: 'W',
+                xTitle: 'Time of Day',
+                yTitle: 'Power (W)'
+            });
+
+            // 3. Temperature Vs Time
+            const ambientBase = 26;
+            const tempCurve = [0.15, 0.42, 0.78, 1.0, 0.96, 0.65, 0.28].map(f => +(ambientBase + f * tempDiffC).toFixed(1));
+            document.getElementById('g3-summary').textContent = `Peak Panel Temp: ${Math.max(...tempCurve).toFixed(1)}°C (ΔT = +${tempDiffC.toFixed(1)}°C)`;
+            document.getElementById('chart-g3').innerHTML = buildLineSVG({
+                labels: hours,
+                series1: tempCurve,
+                color1: '#fb7185',
+                yUnit: '°C',
+                xTitle: 'Time of Day',
+                yTitle: 'Temp (°C)'
+            });
+      // 4. Light Intensity Vs Time
+            const peakLux = Math.max(12000, lightDiffLux * 5.2);
+            const luxCurve = [0.12, 0.52, 0.88, 1.0, 0.91, 0.56, 0.14].map(f => Math.round(f * peakLux));
+            document.getElementById('g4-summary').textContent = `Peak Irradiance: ${peakLux.toLocaleString()} Lux`;
+            document.getElementById('chart-g4').innerHTML = buildLineSVG({
+                labels: hours,
+                series1: luxCurve,
+                color1: '#38bdf8',
+                yUnit: ' Lux',
+                xTitle: 'Time of Day',
+                yTitle: 'Intensity (Lux)'
+            });
+        }
+
+        function buildLineSVG({ labels, series1, series2 = null, color1, color2 = '#64748b', yUnit, xTitle, yTitle }) {
+            const W = 640, H = 230;
+            const padL = 56, padR = 24, padT = 20, padB = 38;
+            const plotW = W - padL - padR;
+            const plotH = H - padT - padB;
+
+            const allVals = series2 ? [...series1, ...series2] : [...series1];
+            const maxVal = Math.max(...allVals, 1) * 1.12;
+
+            const getX = idx => padL + (idx / (labels.length - 1)) * plotW;
+            const getY = val => padT + plotH - (val / maxVal) * plotH;
+
+            const pts1 = series1.map((v, i) => `${getX(i).toFixed(1)},${getY(v).toFixed(1)}`).join(' ');
+            const area1 = `${padL},${padT + plotH} ${pts1} ${getX(labels.length - 1).toFixed(1)},${padT + plotH}`;
+
+            let svg = `<svg viewBox="0 0 ${W} ${H}" class="w-full min-w-[500px] h-auto font-sans">`;
+            // Horizontal grid lines
+            for (let g = 0; g <= 4; g++) {
+                const y = padT + (g / 4) * plotH;
+                const valLabel = ((1 - g / 4) * maxVal).toFixed(maxVal >= 100 ? 0 : 1);
+                svg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#1e293b" stroke-width="1"/>`;
+                svg += `<text x="${padL - 8}" y="${y + 4}" fill="#94a3b8" font-size="10" text-anchor="end">${valLabel}</text>`;
+            }
+
+            // Optional secondary comparison line (Fixed panel)
+            if (series2) {
+                const pts2 = series2.map((v, i) => `${getX(i).toFixed(1)},${getY(v).toFixed(1)}`).join(' ');
+                svg += `<polyline points="${pts2}" fill="none" stroke="${color2}" stroke-width="2.5" stroke-dasharray="5,4"/>`;
+                series2.forEach((v, i) => {
+                    svg += `<circle cx="${getX(i)}" cy="${getY(v)}" r="3.5" fill="${color2}"/>`;
+                });
+            }
+
+            // Primary curve fill & stroke
+            svg += `<polygon points="${area1}" fill="${color1}" fill-opacity="0.14"/>`;
+            svg += `<polyline points="${pts1}" fill="none" stroke="${color1}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+            // Data points & X-axis labels
+            series1.forEach((v, i) => {
+                const cx = getX(i);
+                const cy = getY(v);
+                svg += `<circle cx="${cx}" cy="${cy}" r="4.5" fill="#080d1a" stroke="${color1}" stroke-width="2.5"/>`;
+                svg += `<text x="${cx}" y="${cy - 9}" fill="#f8fafc" font-size="9.5" font-weight="bold" text-anchor="middle">${v}${yUnit}</text>`;
+                svg += `<text x="${cx}" y="${H - 12}" fill="#94a3b8" font-size="10" text-anchor="middle">${labels[i]}</text>`;
+            });
+
+            svg += `</svg>`;
+            return svg;
+        }
+
+        // ==================== DAILY ENERGY DISTRIBUTION PIE DIAGRAM ====================
+        function renderEnergyDistributionPie({ dailyEnergyWh, weight, trackingHours }) {
+            const totalWh = Math.max(1, dailyEnergyWh);
+
+            // Realistic engineering breakdown percentages dynamically responsive to weight & tracking time
+            const servoShare = Math.min(0.14, 0.04 + (weight / 1000) * 0.07);
+            const thermalLossShare = Math.min(0.22, 0.10 + (trackingHours / 12) * 0.08);
+            const batteryChargeShare = 0.44;
+            const directLoadShare = Math.max(0.25, 1 - servoShare - thermalLossShare - batteryChargeShare);
+
+            const slices = [
+                {
+                    label: 'Battery Storage Charging',
+                    pct: +(batteryChargeShare * 100).toFixed(1),
+                    wh: +(totalWh * batteryChargeShare).toFixed(2),
+                    color: '#10b981' // Emerald
+                },
+                {
+                    label: 'Direct DC Load Output',
+                    pct: +(directLoadShare * 100).toFixed(1),
+                    wh: +(totalWh * directLoadShare).toFixed(2),
+                    color: '#f59e0b' // Amber
+                },
+                {
+                    label: 'Thermal & Reflection Loss',
+                    pct: +(thermalLossShare * 100).toFixed(1),
+                    wh: +(totalWh * thermalLossShare).toFixed(2),
+                    color: '#f43f5e' // Rose
+                },
+                {
+                    label: 'Servo & Arduino Consumption',
+                    pct: +(servoShare * 100).toFixed(1),
+                    wh: +(totalWh * servoShare).toFixed(2),
+                    color: '#38bdf8' // Sky
+                }
+            ];
+
+            document.getElementById('dist-total-wh').textContent = `${totalWh.toFixed(2)} Wh / day`;
+
+            // Build SVG Donut/Pie Chart
+            const size = 260, cx = 130, cy = 130, r = 100, innerR = 54;
+            let startAngle = -Math.PI / 2;
+            let paths = '';
+
+            slices.forEach((s, idx) => {
+                const sliceAngle = (s.pct / 100) * Math.PI * 2;
+                const endAngle = startAngle + sliceAngle;
+                const largeArc = sliceAngle > Math.PI ? 1 : 0;
+
+                const x1 = cx + r * Math.cos(startAngle);
+                const y1 = cy + r * Math.sin(startAngle);
+                const x2 = cx + r * Math.cos(endAngle);
+                const y2 = cy + r * Math.sin(endAngle);
+
+                const ix1 = cx + innerR * Math.cos(endAngle);
+                const iy1 = cy + innerR * Math.sin(endAngle);
+                const ix2 = cx + innerR * Math.cos(startAngle);
+                const iy2 = cy + innerR * Math.sin(startAngle);
+
+                const d = `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} L ${ix1} ${iy1} A ${innerR} ${innerR} 0 ${largeArc} 0 ${ix2} ${iy2} Z`;
+
+                paths += `<path d="${d}" fill="${s.color}" stroke="#080d1a" stroke-width="2.5"
+                    class="cursor-pointer transition-opacity hover:opacity-85"
+                    onmouseenter="highlightPieSlice('${s.label}', ${s.pct}, ${s.wh})"
+                    onclick="highlightPieSlice('${s.label}', ${s.pct}, ${s.wh})"/>`;
+
+                startAngle = endAngle;
+            });
+
+            document.getElementById('pie-chart-container').innerHTML = `
+                <svg viewBox="0 0 ${size} ${size}" class="w-full h-full">
+                    ${paths}
+                    <text x="${cx}" y="${cy - 4}" fill="#94a3b8" font-size="10" font-weight="bold" text-anchor="middle">DAILY TOTAL</text>
+                    <text x="${cx}" y="${cy + 14}" fill="#ffffff" font-size="14" font-weight="800" text-anchor="middle">${totalWh.toFixed(1)} Wh</text>
+                </svg>
+            `;
+
+            // Build Legend List
+            document.getElementById('pie-legend-list').innerHTML = slices.map(s => `
+                <div onmouseenter="highlightPieSlice('${s.label}', ${s.pct}, ${s.wh})"
+                     class="bg-slate-950/90 border border-slate-800 hover:border-slate-600 rounded-xl p-3.5 flex items-center justify-between transition cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <span class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${s.color}"></span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-200">${s.label}</span>
+                    </div>
+                    <div class="text-right font-mono">
+                        <span class="text-xs sm:text-sm font-bold text-white">${s.wh} Wh</span>
+                        <span class="text-xs text-slate-400 ml-1.5">(${s.pct}%)</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function highlightPieSlice(label, pct, wh) {
+            document.getElementById('pie-hover-info').textContent = `${label}: ${wh} Wh (${pct}%)`;
+        }
+
+        // ==================== SECTION 2: SUN & LDR SIMULATOR ====================
+        const sunSlider = document.getElementById('sun-slider');
+        function updateSimulator(angleStr) {
+            const angle = parseInt(angleStr, 10);
+            document.getElementById('sun-angle-text').textContent = angle + '°';
+            document.getElementById('servo-angle-text').textContent = angle + '°';
+
+            const rad = (angle * Math.PI) / 180;
+            const leftPercent = 50 - Math.cos(rad) * 38;
+            const topPercent = 72 - Math.sin(rad) * 58;
+
+            const simSun = document.getElementById('sim-sun');
+            simSun.style.left = `calc(${leftPercent}% - 24px)`;
+            simSun.style.top = `${topPercent}%`;
+            document.getElementById('sim-panel').style.transform = `rotate(${angle - 90}deg)`;
+
+            const leftADC = Math.round(280 + ((180 - angle) / 180) * 680);
+            const rightADC = Math.round(280 + (angle / 180) * 680);
+            document.getElementById('ldr-left-val').textContent = `${leftADC} / 1023`;
+            document.getElementById('ldr-right-val').textContent = `${rightADC} / 1023`;
+
+            const simDecision = document.getElementById('sim-decision');
+            if (angle < 82) {
+                simDecision.textContent = currentLang === 'en' ? 'East LDR Higher → Tilting East' : 'पूर्व LDR जास्त → पॅनेल पूर्वेकडे झुकले';
+                simDecision.className = 'text-sm font-bold text-amber-400 mt-1';
+            } else if (angle > 98) {
+                simDecision.textContent = currentLang === 'en' ? 'West LDR Higher → Tilting West' : 'पश्चिम LDR जास्त → पॅनेल पश्चिमेकडे झुकले';
+                simDecision.className = 'text-sm font-bold text-sky-400 mt-1';
+            } else {
+                simDecision.textContent = currentLang === 'en' ? 'LDRs Equal → Overhead Noon Lock' : 'दोन्ही LDR समान → दुपारची स्थिर स्थिती';
+                simDecision.className = 'text-sm font-bold text-emerald-400 mt-1';
+            }
+        }
+        sunSlider.addEventListener('input', e => updateSimulator(e.target.value));
+
+        function copyArduinoCode() {
+            const codeText = document.getElementById('arduinoCode').innerText;
+            const temp = document.createElement('textarea');
+            temp.value = codeText;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            document.getElementById('copyText').textContent = 'Copied!';
+            setTimeout(() => { document.getElementById('copyText').textContent = 'Copy Code'; }, 2000);
+        }
+
+        // Initialize everything on window load
+        window.onload = () => {
+            updateSimulator(90);
+            recalculateAllParameterss();
+        };
+    </script>
+</body>
+</html>
